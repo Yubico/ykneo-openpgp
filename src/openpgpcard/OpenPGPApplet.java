@@ -34,8 +34,8 @@ import javacardx.crypto.*;
  * 0000 - RFU
  * 
  * @author Joeri de Ruiter (joeri@cs.ru.nl)
- * @version $Revision$ by $Author$
- *          $LastChangedDate$
+ * @version $Revision: 12 $ by $Author: joeridr $
+ *          $LastChangedDate: 2012-02-23 15:31:33 +0100 (tor, 23 feb 2012) $
  */
 public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final short _0 = 0;
@@ -47,8 +47,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			0x00 };
 
 	private static final byte[] EXTENDED_CAP = { 
-			(byte) 0xF0, // Support for GET CHALLENGE
-						 // Support for Key Import
+			(byte) 0xD0, // Support for GET CHALLENGE
+						 // No support for Key Import
 						 // PW1 Status byte changeable
 			0x00, // Secure messaging using 3DES
 			0x00, (byte) 0xFF, // Maximum length of challenges
@@ -61,7 +61,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static short RESPONSE_SM_MAX_LENGTH = 231;
 	private static short CHALLENGES_MAX_LENGTH = 255;
 
-	private static short BUFFER_MAX_LENGTH = 510;
+	private static short BUFFER_MAX_LENGTH = 1020;
 
 	private static short LOGINDATA_MAX_LENGTH = 254;
 	private static short URL_MAX_LENGTH = 254;
@@ -74,7 +74,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	// Default PW1 '123456'
 	private static byte[] PW1_DEFAULT = { 0x31, 0x32, 0x33, 0x34, 0x35, 0x36 };
 	private static byte PW1_MODE_NO81 = 0;
-	private static byte PW1_MODE_NO82 = 0;
+	private static byte PW1_MODE_NO82 = 1;
 
 	private static final byte RC_MIN_LENGTH = 8;
 	private static final byte RC_MAX_LENGTH = 127;
@@ -631,13 +631,11 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			if (!pw3.isValidated())
 				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 
-			JCSystem.beginTransaction();
 			key.genKeyPair();
 
 			if (buffer[0] == (byte) 0xB6) {
 				Util.arrayFillNonAtomic(ds_counter, _0, (short) 3, (byte) 0);
 			}
-			JCSystem.commitTransaction();
 		}
 
 		// Output requested key
