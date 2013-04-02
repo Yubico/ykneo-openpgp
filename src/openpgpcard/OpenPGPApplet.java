@@ -506,12 +506,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			if (!rc.check(buffer, _0, rc_length))
 				ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
-
-			// Change PW1
-			JCSystem.beginTransaction();
-			pw1.update(buffer, rc_length, (byte) new_length);
-			pw1_length = (byte) new_length;
-			JCSystem.commitTransaction();
 		} else if (mode == (byte) 0x02) {
 			// Authentication using PW3
 			if (!pw3.isValidated())
@@ -519,15 +513,16 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			if (in_received < PW1_MIN_LENGTH || in_received > PW1_MAX_LENGTH)
 				ISOException.throwIt(SW_WRONG_LENGTH);
-
-			// Change PW1
-			JCSystem.beginTransaction();
-			pw1.update(buffer, _0, (byte) in_received);
-			pw1_length = (byte) in_received;
-			JCSystem.commitTransaction();
 		} else {
 			ISOException.throwIt(SW_WRONG_P1P2);
 		}
+
+		// Change PW1
+		JCSystem.beginTransaction();
+		pw1.update(buffer, _0, (byte) in_received);
+		pw1_length = (byte) in_received;
+		pw1.resetAndUnblock();
+		JCSystem.commitTransaction();
 	}
 
 	/**
@@ -1039,6 +1034,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				JCSystem.beginTransaction();
 				rc.update(buffer, _0, (byte) in_received);
 				rc_length = (byte) in_received;
+				rc.resetAndUnblock();
 				JCSystem.commitTransaction();
 			} else {
 				ISOException.throwIt(SW_WRONG_LENGTH);
