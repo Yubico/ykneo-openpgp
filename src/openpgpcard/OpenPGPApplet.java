@@ -1322,6 +1322,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			len = data[offset];
 		} else if ((data[offset] & (byte) 0x7F) == (byte) 0x01) {
 			len = data[(short) (offset + 1)];
+			len &= 0x00ff;
 		} else if ((data[offset] & (byte) 0x7F) == (byte) 0x02) {
 			len = Util.makeShort(data[(short) (offset + 1)], data[(short) (offset + 2)]);
 		} else {
