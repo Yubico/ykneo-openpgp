@@ -1,7 +1,7 @@
 /**
  * Java Card implementation of the OpenPGP card
  * Copyright (C) 2011  Joeri de Ruiter
- * Copyright (C) 2012  Yubico AB
+ * Copyright (C) 2012-2013  Yubico AB
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
