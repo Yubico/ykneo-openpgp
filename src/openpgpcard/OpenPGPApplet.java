@@ -1099,7 +1099,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		offset++;
 
 		// Check for tag 7F48
-		if (buffer[offset++] != 0x7F && buffer[offset++] != 0x48)
+		if (buffer[offset++] != 0x7F || buffer[offset++] != 0x48)
 			ISOException.throwIt(SW_DATA_INVALID);
 		short len_template = getLength(buffer, offset);
 		offset += getLengthBytes(len_template);
@@ -1136,7 +1136,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		short len_dq1 = getLength(buffer, offset);
 		offset += getLengthBytes(len_dq1);
 
-		if (buffer[offset_data++] != 0x5F && buffer[offset_data++] != 0x48)
+		if (buffer[offset_data++] != 0x5F || buffer[offset_data++] != 0x48)
 			ISOException.throwIt(SW_DATA_INVALID);
 		offset_data += getLengthBytes(getLength(buffer, offset_data));
 
