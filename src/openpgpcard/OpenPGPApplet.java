@@ -1085,6 +1085,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		// TODO The following code still has to be tested
 		short offset = 0;
 
+		if (!pw3.isValidated())
+			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+
 		// Check for tag 4D
 		if (buffer[offset++] != 0x4D)
 			ISOException.throwIt(SW_DATA_INVALID);
