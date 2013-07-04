@@ -46,6 +46,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] HISTORICAL = { 0x00, 0x73, 0x00, 0x00,
 			(byte) 0x80, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00 };
+	
+	// returned by vendor specific command f1
+	private static final byte[] VERSION = { 0x01, 0x00, 0x02 };
 
 	private static final byte[] EXTENDED_CAP = { 
 			(byte) 0xD0, // Support for GET CHALLENGE
@@ -303,6 +306,11 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				} else {
 					ISOException.throwIt(SW_RECORD_NOT_FOUND);
 				}
+				break;
+				
+			// GET VERSION (vendor specific)
+			case (byte) 0xF1:
+				le = Util.arrayCopy(VERSION, _0, buffer, _0, (short) VERSION.length);
 				break;
 	
 			default:

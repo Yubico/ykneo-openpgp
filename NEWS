@@ -6,6 +6,8 @@ ykneo-openpgp NEWS -- History of changes.
 
   Make sure sign bit is thrown away when promoting length field to short.
 
+  Add vendor specific command (f1) to get the applets version.
+
 * Version 1.0.1 (released 2013-04-02)
 
   Fix unblocking of pin with admin pin.
