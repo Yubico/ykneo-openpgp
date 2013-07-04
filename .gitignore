@@ -1,2 +1,7 @@
 bin/
 src/openpgpcard/javacard/
+.classpath
+.project
+.jcop
+.jcproject
+.settings/
