@@ -1,6 +1,6 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.2 (unreleased)
+* Version 1.0.2 (released 2013-07-04)
 
   Bugfixes for import key (still not available through gnupg though).
 
