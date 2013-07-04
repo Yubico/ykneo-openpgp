@@ -1,0 +1,15 @@
+ykneo-openpgp NEWS -- History of changes.
+
+* Version 1.0.2 (unreleased)
+
+  Bugfixes for import key (still not available through gnupg though).
+
+  Make sure sign bit is thrown away when promoting length field to short.
+
+* Version 1.0.1 (released 2013-04-02)
+
+  Fix unblocking of pin with admin pin.
+
+* Version 1.0.0 (released 2012-12-18)
+
+  Initial release.
