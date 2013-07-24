@@ -500,16 +500,16 @@ if os.path.isfile(filenameFINGER):
 ####################
 
 #generate key file
-p1 = subprocess.Popen(["gpg", "--export-secret-key", keyID], stdout=subprocess.PIPE)
-p2 = subprocess.Popen(["openpgp2ssh", keyID], stdin=p1.stdout, stdout=subprocess.PIPE)
-p3 = subprocess.Popen(["openssl","rsa","-text"], stdin=p2.stdout, stdout=subprocess.PIPE)
+p1 = subprocess.Popen(["env", "LANG=C","gpg","--export-secret-key", keyID], stdout=subprocess.PIPE)
+p2 = subprocess.Popen(["env", "LANG=C", "openpgp2ssh", keyID], stdin=p1.stdout, stdout=subprocess.PIPE)
+p3 = subprocess.Popen(["env", "LANG=C", "openssl","rsa","-text"], stdin=p2.stdout, stdout=subprocess.PIPE)
 output = p3.communicate()[0]
 file = open(filenameKEY, "w")
 file.write(output)
 file.close()
 
 #generate fingerprint file
-p = subprocess.Popen(["gpg", "--fingerprint", keyID], stdout=subprocess.PIPE)
+p = subprocess.Popen(["env", "LANG=C", "gpg", "--fingerprint", keyID], stdout=subprocess.PIPE)
 output, err = p.communicate()
 file = open(filenameFINGER, "w")
 file.write(output)
