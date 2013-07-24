@@ -5,8 +5,6 @@ import os
 import sys
 import math
 import subprocess
-import parsingFunctions as pf
-import functions as f
 
 
 import io
@@ -540,17 +538,17 @@ file.close()
 ###############
 
 #parse a key file and builds the key parameters
-key = pf.parse_key_file(keyData, key)
+key = parse_key_file(keyData, key)
 
 #parse the fingerprint file
-fingerprint = pf.parse_fingerprint_file(fingerprintData)
+fingerprint = parse_fingerprint_file(fingerprintData)
 
 
 #strip leading 0 bytes from key parameters - as requested from Klas
-key = f.strip_zero_byte(key)
+key = strip_zero_byte(key)
 
 #count number of bytes per parameter in the key
-key = f.key_size(key)
+key = key_size(key)
 
 #convert public exponent to hex and compute size in byte. 
 #the publicExponent is threated separately becuase it has its own format in the key file
@@ -558,18 +556,18 @@ key["publicExponent"][0] = hex(int(key["publicExponent"][0])).lstrip("0x")
 #count the size and ceil up, for the minimum number of bytes to store the value
 key["publicExponent"][1] = int(math.ceil(float(len(key["publicExponent"][0]))/2))
 #add 0 padding for the size of the exponent (usually 5 char 10001)
-key["publicExponent"][0] = f.prepend_zero(key["publicExponent"][0])
+key["publicExponent"][0] = prepend_zero(key["publicExponent"][0])
 
 
 #simple function compute total payload (just for readability)
-byte_size = f.payload_size(byte_size, key)
+byte_size = payload_size(byte_size, key)
 
 
 #Build the final command with the commandPart and the specific byte_size
-keycmd = f.build_command(byte_size, key, keyType)
+keycmd = build_command(byte_size, key, keyType)
 
 #build the final fingerprint command
-fingercmd = f.build_fingerprint(fingerprint, fingerprintType)
+fingercmd = build_fingerprint(fingerprint, fingerprintType)
   
 
 #print result
