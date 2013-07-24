@@ -19,7 +19,8 @@ sudo apt-get install gpg
 #########
 
 
-# Usage: python keyParser.py keyFormat fingerprintType keyID
+# Usage: python keyParser.py keyType fingerprintType keyID
+# keyType and fingerprintType are specified here: http://www.g10code.com/docs/openpgp-card-2.0.pdf
 
 ~$ python keyParser.py B6 C9 1A4FFEBA
 
