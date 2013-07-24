@@ -5,13 +5,7 @@ import os
 import sys
 import math
 import subprocess
-
-
-import io
-import os
-import sys
-import math
-
+import re
 
 #
 # strip_zero_byte: just removes the leadin 0 bytes, for readability moved in functions.py
