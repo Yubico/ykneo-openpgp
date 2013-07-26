@@ -244,8 +244,8 @@ def build_command(byte_size, key, keyType):
     
     
     #building chuck sizes
-    byte_size["template"] = 21#byte_size["payload"] + 21#14 byte for commands
-    byte_size["header"] = 1011#byte_size["template"] + 14 #8 byte for the commands
+    byte_size["template"] = byte_size["payload"] + 7#21 byte for commands
+    byte_size["header"] = byte_size["template"] +  12#8 byte for the commands
     byte_size["publicExponent"] = key["publicExponent"][1]
     byte_size["prime1"] = key["prime1"][1]
     byte_size["prime2"] = key["prime2"][1]
