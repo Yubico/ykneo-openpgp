@@ -1,11 +1,10 @@
-#!/usr/bin/pyton
+#!/usr/bin/python
 
 import io
 import os
 import sys
 import math
-import subprocess
-import re
+
 
 #
 # strip_zero_byte: just removes the leadin 0 bytes, for readability moved in functions.py
@@ -29,7 +28,7 @@ def key_size(key):
     for label, value in key.items():
          
         bytesize = value.count(':')
-        value  = [value, "1"]
+        value = [value, "1"]
         key[label] = value
         key[label][1] = bytesize+1 #+1 because there is one byte more then columns (:) separator
         
@@ -100,7 +99,7 @@ def return_ber_length(size):
 # Returns the payload formatted for the opensc command diveded in chunks of 255 or less
 #
 def build_payload(key):
-    
+    """
     payload = ""
     
     for label, value in key.items():
@@ -109,8 +108,21 @@ def build_payload(key):
             print "NOTICE: Skipping private exponent."
         else:
             payload = payload + " " + key[label][0]
-  
-    return payload.replace(":"," ")  
+    """
+
+    payload = []
+    payload.append(key["publicExponent"][0])
+    payload.append(key["prime1"][0])
+    payload.append(key["prime2"][0])
+    payload.append(key["coefficient"][0])
+    payload.append(key["exponent1"][0])
+    payload.append(key["exponent2"][0])
+    payload.append(key["modulus"][0])
+    
+    mystring = ''.join(payload)
+    
+
+    return mystring.replace(":"," ")  
             
 
 
@@ -172,6 +184,7 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
     i=0 
     temp = ""
     byteNum = 0
+    tempList = []
     
     #build block structure
     block = (commandPart["commandOption"] + commandPart["singleQuote"] + 
@@ -180,10 +193,8 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
             commandPart["lastChunk"] + (hex(lastChunkSize)).lstrip('0x') + " " )
     
     
-    
     #this for loop builds 255 byte long chunks (250 + 4 command +1 for size)
     for c in payload:
-        whitespace = 0
         temp = temp + c
         if c == " ":
             byteNum = byteNum +1
@@ -196,17 +207,19 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
     #append the remaining byte for the last chunk    
     listOfChunks.append(temp)            
     
+    
     #trim possible white space remaining at the end of the chunks and assemble blocks
     #not sure this is very pythonian...
     for element in listOfChunks[:-1]:
-        listOfChunks[i] = block + element.rstrip(" ") + commandPart["singleQuote"]
-        i+=1
+        tempList.append(block + element.rstrip(" ") + commandPart["singleQuote"])
+        
         
     #build the last block which begins with a different byte code and trim white space
-    listOfChunks[i] = endBlock + element.rstrip(" ") + commandPart["singleQuote"]
+    tempList.append(endBlock + listOfChunks[-1].rstrip(" ") + commandPart["singleQuote"])
+
     
     #join the chunks
-    temp = ''.join(listOfChunks)
+    temp = ''.join(tempList)
     #build the final command
     finalCommand = (commandPart["commandStart"] + temp)
 
@@ -231,8 +244,8 @@ def build_command(byte_size, key, keyType):
     
     
     #building chuck sizes
-    byte_size["template"] = byte_size["payload"] +14 #14 byte for commands
-    byte_size["header"] = byte_size["template"] + 8 #8 byte for the commands
+    byte_size["template"] = 21#byte_size["payload"] + 21#14 byte for commands
+    byte_size["header"] = 1011#byte_size["template"] + 14 #8 byte for the commands
     byte_size["publicExponent"] = key["publicExponent"][1]
     byte_size["prime1"] = key["prime1"][1]
     byte_size["prime2"] = key["prime2"][1]
@@ -268,8 +281,6 @@ def build_command(byte_size, key, keyType):
     commandPart["11"] = "5f 48 "+return_ber_length(byte_size["payload"])+" "
     commandPart["payload"] = build_payload(key)
     commandPart["lastChunk"] = "00 db 3f ff "
-    
-    
     
     
     #assemble the total command and count how many bytes we have
@@ -361,219 +372,7 @@ def build_fingerprint(fingerprint, keyType):
                commandParts["payload"] + commandParts["singleQuote"])
     
     return command
-
-
-#########################################################
-# EXTRACT THE SINGLE PARAMETERs FROM A OPENSSL KEY FILE #
-#########################################################
-
-#
-#parse_key_file:(data, key): 
-#extracts modulus, private exponent, prim1, prime2, exponent1, exponent2, coeffiecient from an openssl key file
-#
-def parse_key_file(data, key):
-
-
     
-    result = re.search(r'(modulus:\n)(.+)(\npublicExponent:)', data, re.DOTALL)
-    if result:
-        key["modulus"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error modulus"
-        sys.exit(1)
     
-    result = re.search(r'(publicExponent: )(\d+)(.+)(privateExponent:)', data, re.DOTALL)
-    if result:
-        key["publicExponent"] = result.group(2)
-        if not result.group(2) == "65537":
-           print "the publicExponent is not 65537, press (c)ontinue anything else to (e)xit"
-           var = raw_input(">>")
-           if not var == "c":
-               print "User Exit"
-               sys.exit(0)
-        
-    else:
-        print "The public exponent is not 65537"
-        sys.exit(1)
-
     
-    result = re.search(r'(privateExponent:\n)(.+)(\nprime1:)', data, re.DOTALL)
-    if result:
-        key["privateExponent"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error privateExponent"
-        sys.exit(1)
-
-    result = re.search(r'(prime1:\n)(.+)(\nprime2:)', data, re.DOTALL)
-    if result:
-        key["prime1"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error prime1"
-        sys.exit(1)
-
-    result = re.search(r'(prime2:\n)(.+)(\nexponent1:)', data, re.DOTALL)
-    if result:
-        key["prime2"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error prime2"
-        sys.exit(1)
-
-    result = re.search(r'(exponent1:\n)(.+)(\nexponent2:)', data, re.DOTALL)
-    if result:
-        key["exponent1"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error exponent1"
-        sys.exit(1)    
-
-    result = re.search(r'(exponent2:\n)(.+)(\ncoefficient:)', data, re.DOTALL)
-    if result:
-        key ["exponent2"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error exponent2"
-        sys.exit(1)
-
-    result = re.search(r'(coefficient:\n)(.+)(\n-----BEGIN RSA PRIVATE KEY-----)', data, re.DOTALL)
-    if result:
-        key["coefficient"] = result.group(2).translate(None, ' \n')
-    else:
-        print "dedaly error coefficient"
-        sys.exit(1)
-        
-
-    return key
-
-
-
-
-
-
-
-
-
-#
-#parse_fingerprint_file:(fingerprintData): extract fingerprint for the selected key
-#
-def parse_fingerprint_file(fingerprintData):
     
-    result = re.search(r'(Key fingerprint = )(.+)(\nuid)', fingerprintData, re.DOTALL)
-    if result:
-        fingerprint = result.group(2).translate(None, ' ')
-    else:
-        print "dedaly error fingerprint"
-        sys.exit(1)
-    
-    return fingerprint
-
-
-
-#check if the program was executed correctly with user input
-if len(sys.argv) != 4:
-    print("\nUsage: python keyParser.py keyFormat fingerprintType keyID  (i.e. python keyParser.py B6 C9 1A4FFEBA")
-    sys.exit(2)
-
-
-##################
-# Initialization #
-##################
-
-#defines key structure [ VALUE , NUM BYTE SIZE]
-key = {}
-#define key parameters size with this structure
-byte_size = {'payload':int(0)}
-
-#user input keytype - defined at user input, indicates the Key Type
-keyType = sys.argv[1]
-fingerprintType = sys.argv[2]
-keyID = sys.argv[3]
-
-filenameKEY = "keyFile"
-filenameFINGER = "keyFingerprint"
-# remove existing copy of these file
-if os.path.isfile(filenameKEY):
-    os.remove(filenameKEY)
-if os.path.isfile(filenameFINGER):
-    os.remove(filenameFINGER)
-
-
-####################
-# generating files #
-####################
-
-#generate key file
-p1 = subprocess.Popen(["env", "LANG=C","gpg","--export-secret-key", keyID], stdout=subprocess.PIPE)
-p2 = subprocess.Popen(["env", "LANG=C", "openpgp2ssh", keyID], stdin=p1.stdout, stdout=subprocess.PIPE)
-p3 = subprocess.Popen(["env", "LANG=C", "openssl","rsa","-text"], stdin=p2.stdout, stdout=subprocess.PIPE)
-output = p3.communicate()[0]
-file = open(filenameKEY, "w")
-file.write(output)
-file.close()
-
-#generate fingerprint file
-p = subprocess.Popen(["env", "LANG=C", "gpg", "--fingerprint", keyID], stdout=subprocess.PIPE)
-output, err = p.communicate()
-file = open(filenameFINGER, "w")
-file.write(output)
-file.close()
-
-
-#read the key file content into memory
-file = open (filenameKEY, 'r')
-keyData = file.read()
-file.close()
-#read the fingerprint file content into memory
-file = open (filenameFINGER, 'r')
-fingerprintData = file.read()
-file.close()
-
-
-
-###############
-# Computation #
-###############
-
-#parse a key file and builds the key parameters
-key = parse_key_file(keyData, key)
-
-#parse the fingerprint file
-fingerprint = parse_fingerprint_file(fingerprintData)
-
-
-#strip leading 0 bytes from key parameters - as requested from Klas
-key = strip_zero_byte(key)
-
-#count number of bytes per parameter in the key
-key = key_size(key)
-
-#convert public exponent to hex and compute size in byte. 
-#the publicExponent is threated separately becuase it has its own format in the key file
-key["publicExponent"][0] = hex(int(key["publicExponent"][0])).lstrip("0x")
-#count the size and ceil up, for the minimum number of bytes to store the value
-key["publicExponent"][1] = int(math.ceil(float(len(key["publicExponent"][0]))/2))
-#add 0 padding for the size of the exponent (usually 5 char 10001)
-key["publicExponent"][0] = prepend_zero(key["publicExponent"][0])
-
-
-#simple function compute total payload (just for readability)
-byte_size = payload_size(byte_size, key)
-
-
-#Build the final command with the commandPart and the specific byte_size
-keycmd = build_command(byte_size, key, keyType)
-
-#build the final fingerprint command
-fingercmd = build_fingerprint(fingerprint, fingerprintType)
-  
-
-#print result
-print "\nKEY conversion :\n"
-print keycmd
-#print result
-print "\nFingerprint conversion:\n"
-print fingercmd
-
-
-
-
-
-#exit without errors
-sys.exit(0)
