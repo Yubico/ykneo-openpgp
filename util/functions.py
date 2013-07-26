@@ -149,6 +149,28 @@ def byte_count(string):
 
 
 
+def return_template_size(byte_size):
+
+
+    value = (return_ber_length(byte_size["publicExponent"])+
+             return_ber_length(byte_size["prime1"])+
+             return_ber_length(byte_size["prime2"])+
+             return_ber_length(byte_size["coefficient"])+
+             return_ber_length(byte_size["exponent1"])+
+             return_ber_length(byte_size["exponent2"])+
+             return_ber_length(byte_size["modulus"]))
+
+    #sanitize payload by removing all white space
+    value = value.translate(None, ' ')
+    #format payload with a white space every byte
+    value = insert_whitespace(value)
+    #count how many bytes are stored in the payload
+    size = byte_count(value)
+    
+
+    return size+7#7 is the number of byte for commands openpgp.pdf
+
+
 ### END OF UTILITY FUNCTIONS ###
 ################################
 
@@ -244,8 +266,6 @@ def build_command(byte_size, key, keyType):
     
     
     #building chuck sizes
-    byte_size["template"] = byte_size["payload"] + 7#21 byte for commands
-    byte_size["header"] = byte_size["template"] +  12#8 byte for the commands
     byte_size["publicExponent"] = key["publicExponent"][1]
     byte_size["prime1"] = key["prime1"][1]
     byte_size["prime2"] = key["prime2"][1]
@@ -254,10 +274,8 @@ def build_command(byte_size, key, keyType):
     byte_size["exponent2"] = key["exponent2"][1]
     byte_size["modulus"] = key["modulus"][1]
     byte_size["tail"] = byte_size["payload"]
-    
-    
-    
-    
+    byte_size["template"] = return_template_size(byte_size)
+    byte_size["header"] = byte_size["template"]+byte_size["payload"]+2#2 is the byte for key type definition b6 00
     #######################################
     # Building the command piece by piece #
     #######################################
