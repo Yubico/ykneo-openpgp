@@ -99,7 +99,7 @@ def parse_key_file(data, key):
 #
 def parse_fingerprint_file(fingerprintData):
     
-    result = re.search(r'(Key fingerprint = )(.+)(\nuid)', fingerprintData, re.DOTALL)
+    result = re.search(r'(Key fingerprint = )(.+?)(\nuid)', fingerprintData, re.DOTALL)
     if result:
         fingerprint = result.group(2).translate(None, ' ')
     else:
