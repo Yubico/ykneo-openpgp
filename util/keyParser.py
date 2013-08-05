@@ -101,19 +101,21 @@ key["publicExponent"][0] = f.prepend_zero(key["publicExponent"][0])
 #simple function compute total payload (just for readability)
 byte_size = f.payload_size(byte_size, key)
 
-#Build the final command with the commandPart and the specific byte_size
-keycmd = f.build_command(byte_size, key, keyType, pincode)
+
 
 #build the final fingerprint command
-fingercmd = f.build_fingerprint(fingerprint, fingerprintType)
-  
+fingerpart = f.build_fingerprint(fingerprint, fingerprintType)
+
+#Build the final command with the commandPart and the specific byte_size
+keycmd = f.build_command(byte_size, key, keyType, pincode, fingerpart)
+
 
 #print result
 print "\nKEY conversion :\n"
 print keycmd
 #print result
-print "\nFingerprint conversion:\n"
-print fingercmd
+#print "\nFingerprint conversion:\n"
+#print fingercmd
 
 
 

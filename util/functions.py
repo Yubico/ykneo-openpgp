@@ -94,8 +94,21 @@ def return_ber_length(size):
 
 
 
+#
+# hexfy_ascii, convert a ascii string values "93 45 23 45 67" from ascii to hex
+#
+def hexfy_ascii(ascii):
+    
+    mylist = ascii.split(' ')
+    for idx, val in enumerate(mylist):
+        mylist[idx] = hex(int(val)).lstrip('0x')
 
-	
+    mystring = ''.join(mylist)
+    mystring = insert_whitespace(mystring)
+        
+    return mystring
+
+
 #
 # pincode_formatter takes a pincode converts it to ascii and calculates the length. 
 #
@@ -108,9 +121,16 @@ def pincode_formatter(pincode):
 	size = byte_count(ascii)
 	#convert it to hex
 	size = hex(size)
+        size = size.lstrip('0x')
+        #add zero 
+        size = prepend_zero(size)
+        if len(size) > 2:
+            size = insert_whitespace(size)
+        
+        asciihex = hexfy_ascii(ascii)
 
 	#build the string
-	pincode = "00 20 00 83 "+ size + " " + ascii
+	pincode = "00 20 00 83 "+ size + " " + asciihex
 	
 	print pincode
 	
@@ -221,7 +241,7 @@ def return_template_size(byte_size):
 #
 # chunk_builder: builds the final command, using 250bytes block + 4 byte command and +1 byte size
 #
-def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
+def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart, fingerpart):
     
     #initialization of some temp variables
     listOfChunks = []
@@ -265,7 +285,7 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
     #join the chunks
     temp = ''.join(tempList)
     #build the final command
-    finalCommand = (commandPart["commandStart"] + commandPart["pincode"] + temp)
+    finalCommand = (commandPart["commandStart"] + commandPart["pincode"] + temp + fingerpart)
 
     return finalCommand
     
@@ -277,7 +297,7 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
 #
 # BUILD COMMAND: takes all command components and builds them into a full command
 #
-def build_command(byte_size, key, keyType, pincode):
+def build_command(byte_size, key, keyType, pincode, fingerpart):
     
     #define the size of a full chunk
     chunkSize = 250
@@ -311,7 +331,7 @@ def build_command(byte_size, key, keyType, pincode):
     commandPart["commandOption"] = " -s "
     commandPart["singleQuote"] = "\'"
     commandPart["firstChunk"] = "10 db 3f ff "
-	commandPart["pincode"] = " -s '" + pincode + "'"
+    commandPart["pincode"] = " -s '" + pincode + "'"
     commandPart["1"] = "4d "+return_ber_length(byte_size["header"])+" " 
     commandPart["2"] =  keyType+" 00 "
     commandPart["3"] = "7f 48 "+return_ber_length(byte_size["template"])+" "
@@ -352,7 +372,7 @@ def build_command(byte_size, key, keyType, pincode):
     lastChunkSize = payloadSize % 250
     
     #at this point the payload is formatted and ready to be attached in the command    
-    finalCommand = chunk_builder(payload, chunkSize, lastChunkSize, chunksNum, commandPart)
+    finalCommand = chunk_builder(payload, chunkSize, lastChunkSize, chunksNum, commandPart, fingerpart)
     
     
     
@@ -402,21 +422,29 @@ def build_fingerprint(fingerprint, keyType):
     
     
     #NOTICE: if white space is needed is always at the end of the string!
-    commandParts["commandName"] = "opensc-tool -s '00 A4 04 00 06 D2 76 00 01 24 01' "
-    commandParts["commandOption"] = "-s "
+    commandParts["commandName"] = "opensc-tool -s '00 A4 04 00 06 D2 76 00 01 24 01'"
+    commandParts["commandOption"] = " -s "
     commandParts["commandBegin"] = "00 da 00 "
     commandParts["keyType"] = keyType+" "
     commandParts["byteSize"] = return_ber_length(byte_count(fingerprint))+" "
     commandParts["payload"] = fingerprint
     commandParts["singleQuote"] = "\'"
     
-    command = (commandParts["commandName"] + commandParts["commandOption"] +
+    #command = (commandParts["commandName"] + commandParts["commandOption"] +
+    #           commandParts["singleQuote"] + commandParts["commandBegin"] +
+    #           commandParts["keyType"] + commandParts["byteSize"] +
+    #           commandParts["payload"] + commandParts["singleQuote"])
+    
+    #old version was returning 2 separate commands
+    #return command
+    
+    fingerprint = (commandParts["commandOption"] +
                commandParts["singleQuote"] + commandParts["commandBegin"] +
                commandParts["keyType"] + commandParts["byteSize"] +
                commandParts["payload"] + commandParts["singleQuote"])
-    
-    return command
-    
+
+
+    return fingerprint
     
     
     
