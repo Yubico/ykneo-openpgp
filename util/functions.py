@@ -132,7 +132,6 @@ def pincode_formatter(pincode):
 	#build the string
 	pincode = "00 20 00 83 "+ size + " " + asciihex
 	
-	print pincode
 	
 	return pincode
 
