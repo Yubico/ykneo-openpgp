@@ -95,6 +95,28 @@ def return_ber_length(size):
 
 
 
+	
+#
+# pincode_formatter takes a pincode converts it to ascii and calculates the length. 
+#
+def pincode_formatter(pincode):
+
+	ascii = ''.join(str(ord(c)) for c in pincode)
+	#default 00 20 00 83 08 31 32 33 34 35 36 37 38
+	ascii = insert_whitespace(ascii)
+	#count the length of the pin
+	size = byte_count(ascii)
+	#convert it to hex
+	size = hex(size)
+
+	#build the string
+	pincode = "00 20 00 83 "+ size + " " + ascii
+	
+	print pincode
+	
+	return pincode
+
+
 #
 # Returns the payload formatted for the opensc command diveded in chunks of 255 or less
 #
@@ -138,7 +160,7 @@ def insert_whitespace(string, every=2):
 
 
 #
-# counts the bytse in a string
+# counts the bytes in a string representing a byte list
 #
 def byte_count(string):
       
@@ -243,7 +265,7 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
     #join the chunks
     temp = ''.join(tempList)
     #build the final command
-    finalCommand = (commandPart["commandStart"] + temp)
+    finalCommand = (commandPart["commandStart"] + commandPart["pincode"] + temp)
 
     return finalCommand
     
@@ -255,7 +277,7 @@ def chunk_builder(payload, chuckSize, lastChunkSize, chunksNum, commandPart):
 #
 # BUILD COMMAND: takes all command components and builds them into a full command
 #
-def build_command(byte_size, key, keyType):
+def build_command(byte_size, key, keyType, pincode):
     
     #define the size of a full chunk
     chunkSize = 250
@@ -264,6 +286,9 @@ def build_command(byte_size, key, keyType):
     #here we will build single command components
     commandPart = {}
     
+	#convert the pincode into ascii and calculate pincode length
+    pincode = pincode_formatter(pincode)
+	
     
     #building chuck sizes
     byte_size["publicExponent"] = key["publicExponent"][1]
@@ -286,6 +311,7 @@ def build_command(byte_size, key, keyType):
     commandPart["commandOption"] = " -s "
     commandPart["singleQuote"] = "\'"
     commandPart["firstChunk"] = "10 db 3f ff "
+	commandPart["pincode"] = " -s '" + pincode + "'"
     commandPart["1"] = "4d "+return_ber_length(byte_size["header"])+" " 
     commandPart["2"] =  keyType+" 00 "
     commandPart["3"] = "7f 48 "+return_ber_length(byte_size["template"])+" "
