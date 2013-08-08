@@ -99,11 +99,13 @@ def parse_key_file(data, key):
 #
 def parse_fingerprint_file(fingerprintData, keyid):
     
-    regexp = r"(Key fingerprint = )(.+?)("+re.escape(keyid[-4:])+"\n)"
+
+    keyid = keyid[-4:]
+    regexp = r"(Key fingerprint = )(.+?)("+keyid+"\n)"
     
     result = re.search(regexp, fingerprintData, re.DOTALL)
     if result:
-        fingerprint = result.group(2)+keyid[-4:]
+        fingerprint = result.group(2)+keyid
         fingerprint = fingerprint.translate(None, ' ')
     else:
         print "dedaly error fingerprint"
