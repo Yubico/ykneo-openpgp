@@ -101,11 +101,11 @@ def parse_fingerprint_file(fingerprintData, keyid):
     
 
     keyid = keyid[-4:]
-    regexp = r"(Key fingerprint = )(.+?)("+keyid+")"
+    regexp = r"^\s+Key fingerprint = (.+?)" + keyid +"$"
     
-    result = re.search(regexp, fingerprintData, re.DOTALL)
+    result = re.search(regexp, fingerprintData, re.MULTILINE)
     if result:
-        fingerprint = result.group(2)+keyid
+        fingerprint = result.group(1)+keyid
         fingerprint = fingerprint.translate(None, ' ')
     else:
         print "dedaly error fingerprint"

@@ -55,7 +55,7 @@ file.write(output)
 file.close()
 
 #generate fingerprint file
-p = subprocess.Popen(["gpg", "--fingerprint"," --fingerprint", keyID], stdout=subprocess.PIPE)
+p = subprocess.Popen(["gpg", "--fingerprint","--fingerprint", keyID], stdout=subprocess.PIPE)
 output, err = p.communicate()
 file = open(filenameFINGER, "w")
 file.write(output)
