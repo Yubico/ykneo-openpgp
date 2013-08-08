@@ -55,7 +55,7 @@ file.write(output)
 file.close()
 
 #generate fingerprint file
-p = subprocess.Popen(["gpg", "--fingerprint", keyID], stdout=subprocess.PIPE)
+p = subprocess.Popen(["gpg", "--fingerprint"," --fingerprint", keyID], stdout=subprocess.PIPE)
 output, err = p.communicate()
 file = open(filenameFINGER, "w")
 file.write(output)
@@ -81,7 +81,7 @@ file.close()
 key = pf.parse_key_file(keyData, key)
 
 #parse the fingerprint file
-fingerprint = pf.parse_fingerprint_file(fingerprintData)
+fingerprint = pf.parse_fingerprint_file(fingerprintData, keyID)
 
 #strip leading 0 bytes from key parameters - as requested from Klas
 key = f.strip_zero_byte(key)

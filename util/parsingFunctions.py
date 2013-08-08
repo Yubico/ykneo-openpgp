@@ -97,11 +97,14 @@ def parse_key_file(data, key):
 #
 #parse_fingerprint_file:(fingerprintData): extract fingerprint for the selected key
 #
-def parse_fingerprint_file(fingerprintData):
+def parse_fingerprint_file(fingerprintData, keyid):
     
-    result = re.search(r'(Key fingerprint = )(.+?)(\nuid)', fingerprintData, re.DOTALL)
+    regexp = r"(Key fingerprint = )(.+?)("+re.escape(keyid[-4:])+"\n)"
+    print keyid[-4:]
+    result = re.search(regexp, fingerprintData, re.DOTALL)
     if result:
-        fingerprint = result.group(2).translate(None, ' ')
+        fingerprint = result.group(2)+keyid[-4:]
+        fingerprint = fingerprint.translate(None, ' ')
     else:
         print "dedaly error fingerprint"
         sys.exit(1)
