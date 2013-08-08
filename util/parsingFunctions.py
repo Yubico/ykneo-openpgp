@@ -101,7 +101,7 @@ def parse_fingerprint_file(fingerprintData, keyid):
     
 
     keyid = keyid[-4:]
-    regexp = r"(Key fingerprint = )(.+?)("+keyid+"\n)"
+    regexp = r"(Key fingerprint = )(.+?)("+keyid+")"
     
     result = re.search(regexp, fingerprintData, re.DOTALL)
     if result:
