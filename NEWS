@@ -2,18 +2,22 @@ ykneo-openpgp NEWS -- History of changes.
 
 * Version 1.0.3 (unreleased)
 
+** Added tool to import key using opensc commands, see util/.
+
+** Fixed applet bugs to enable key import.
+
 * Version 1.0.2 (released 2013-07-04)
 
-  Bugfixes for import key (still not available through gnupg though).
+** Bugfixes for import key (still not available through gnupg though).
 
-  Make sure sign bit is thrown away when promoting length field to short.
+** Make sure sign bit is thrown away when promoting length field to short.
 
-  Add vendor specific command (f1) to get the applets version.
+** Add vendor specific command (f1) to get the applets version.
 
 * Version 1.0.1 (released 2013-04-02)
 
-  Fix unblocking of pin with admin pin.
+** Fix unblocking of pin with admin pin.
 
 * Version 1.0.0 (released 2012-12-18)
 
-  Initial release.
+** Initial release.
