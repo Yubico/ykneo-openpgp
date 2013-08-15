@@ -33,9 +33,7 @@ fi
 
 releasename=ykneo-openpgp-${VERSION}
 
-git push
 git tag -u ${PGP_KEYID} -m $VERSION $VERSION
-git push --tags
 tmpdir=`mktemp -d /tmp/release.XXXXXX`
 releasedir=${tmpdir}/${releasename}
 mkdir -p $releasedir
@@ -43,7 +41,6 @@ git archive $VERSION --format=tar | tar -xC $releasedir
 git2cl > $releasedir/ChangeLog
 tar -cz --directory=$tmpdir --file=${releasename}.tar.gz $releasename
 cd $releasedir
-cp /tmp/build.xml .
 ant -q -DJAVACARD_HOME=$JAVACARD_HOME
 cd -
 cp $releasedir/bin/openpgpcard/javacard/openpgpcard.cap ${releasename}.cap
@@ -52,3 +49,5 @@ gpg --detach-sign --default-key $PGP_KEYID ${releasename}.cap
 $YUBICO_GITHUB_REPO/publish ykneo-openpgp $VERSION ${releasename}.tar.gz*
 $YUBICO_GITHUB_REPO/publish ykneo-openpgp $VERSION ${releasename}.cap*
 rm -rf $tmpdir
+git push
+git push --tags
