@@ -29,7 +29,7 @@ fi
 releasename=ykneo-openpgp-${VERSION}
 
 git push
-git tag -u ${PGP_KEYID}! -m $VERSION $VERSION
+git tag -u ${PGP_KEYID} -m $VERSION $VERSION
 git push --tags
 tmpdir=`mktemp -d /tmp/release.XXXXXX`
 releasedir=${tmpdir}/${releasename}
