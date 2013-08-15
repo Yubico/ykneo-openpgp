@@ -1,4 +1,4 @@
-#!/usr/bin/pyton
+#!/usr/bin/python
 
 import io
 import os
@@ -11,8 +11,8 @@ import functions as f
 
 
 #check if the program was executed correctly with user input
-if len(sys.argv) != 5:
-    print("\nUsage: python keyParser.py keyFormat fingerprintType keyID  (i.e. python keyParser.py B6 C9 1A4FFEBA smartcard_pincode")
+if len(sys.argv) != 4:
+    print("\nUsage: python keyParser.py {a|s|e} keyID pincode (i.e. python keyParser.py e 1A4FFEBA smartcard_pincode")
     sys.exit(2)
 
 
@@ -26,10 +26,22 @@ key = {}
 byte_size = {'payload':int(0)}
 
 #user input keytype - defined at user input, indicates the Key Type
-keyType = sys.argv[1]
-fingerprintType = sys.argv[2]
-keyID = sys.argv[3]
-pincode = sys.argv[4]
+keyPurpose = sys.argv[1]
+keyID = sys.argv[2]
+pincode = sys.argv[3]
+
+if keyPurpose == 'a':
+  keyType = 'A4'
+  fingerprintType = 'C9'
+elif keyPurpose == 's':
+  keyType = 'B6'
+  fingerprintType = 'C7'
+elif keyPurpose == 'e':
+  keyType = 'B8'
+  fingerprintType = 'C8'
+else:
+  print("\nUsage: python keyParser.py {a|s|e} keyID pincode (i.e. python keyParser.py e 1A4FFEBA smartcard_pincode")
+  sys.exit(2)
 
 filenameKEY = "keyFile"
 filenameFINGER = "keyFingerprint"
