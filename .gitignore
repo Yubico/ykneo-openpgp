@@ -5,3 +5,4 @@ src/openpgpcard/javacard/
 .jcop
 .jcproject
 .settings/
+util/*.pyc
