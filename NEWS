@@ -1,10 +1,10 @@
 ykneo-openpgp NEWS -- History of changes.
 
+* Version 1.0.4 (unreleased)
+
 * Version 1.0.3 (released 2013-08-15)
 
 ** Added tool to import key using opensc commands, see util/.
-
-** Fixed applet bugs to enable key import.
 
 * Version 1.0.2 (released 2013-07-04)
 

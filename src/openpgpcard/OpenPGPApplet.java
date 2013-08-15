@@ -1,7 +1,7 @@
 /**
  * Java Card implementation of the OpenPGP card
- * Copyright (C) 2011  Joeri de Ruiter
  * Copyright (C) 2012-2013  Yubico AB
+ * Copyright (C) 2011  Joeri de Ruiter
  * 
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
@@ -48,7 +48,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			0x00 };
 	
 	// returned by vendor specific command f1
-	private static final byte[] VERSION = { 0x01, 0x00, 0x03 };
+	private static final byte[] VERSION = { 0x01, 0x00, 0x04 };
 
 	private static final byte[] EXTENDED_CAP = { 
 			(byte) 0xD0, // Support for GET CHALLENGE
