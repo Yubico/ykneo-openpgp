@@ -1147,11 +1147,16 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		short len_dq1 = getLength(buffer, offset);
 		offset += getLengthBytes(len_dq1);
 
+		if (buffer[offset++] != (byte) 0x97)
+			ISOException.throwIt(SW_DATA_INVALID);
+		short len_modulus = getLength(buffer, offset);
+		offset += getLengthBytes(len_dq1);
+
 		if (buffer[offset_data++] != 0x5F || buffer[offset_data++] != 0x48)
 			ISOException.throwIt(SW_DATA_INVALID);
 		offset_data += getLengthBytes(getLength(buffer, offset_data));
 
-		// TODO Check value of e
+		key.setExponent(buffer, offset_data, len_e);
 		offset_data += len_e;
 
 		key.setP(buffer, offset_data, len_p);
@@ -1168,6 +1173,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		key.setDQ1(buffer, offset_data, len_dq1);
 		offset_data += len_dq1;
+
+		key.setModulus(buffer, offset_data, len_modulus);
+		offset_data += len_modulus;
 	}
 
 	/**
