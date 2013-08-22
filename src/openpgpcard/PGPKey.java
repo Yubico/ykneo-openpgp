@@ -36,7 +36,7 @@ public class PGPKey implements ISO7816 {
 	private KeyPair key;
 	private byte[] fp;
 	private byte[] time = { 0x00, 0x00, 0x00, 0x00 };
-	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x02 };
+	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x03 };
 
 	public PGPKey() {
 		key = new KeyPair(KeyPair.ALG_RSA_CRT, KEY_SIZE);
@@ -245,5 +245,41 @@ public class PGPKey implements ISO7816 {
 	 */
 	public void setQ(byte[] buffer, short offset, short length) {
 		((RSAPrivateCrtKey) key.getPrivate()).setQ(buffer, offset, length);
+	}
+
+	/**
+	 * Sets the value of the Exponent parameter. The plain text data format is
+	 * big-endian and right-aligned (the least significant bit is the least
+	 * significant bit of last byte). Input Exponent parameter data is copied
+	 * into the internal representation.
+	 * 
+	 * @param buffer
+	 *            The input buffer
+	 * @param offset
+	 *            The offset into the input buffer at which the parameter value
+	 *            begins
+	 * @param length
+	 *            The length of the parameter
+	 */
+	public void setExponent(byte[] buffer, short offset, short length) {
+		((RSAPublicKey) key.getPublic()).setExponent(buffer, offset, length);
+	}
+
+	/**
+	 * Sets the value of the Modulus parameter. The plain text data format is
+	 * big-endian and right-aligned (the least significant bit is the least
+	 * significant bit of last byte). Input Modulus parameter data is copied
+	 * into the internal representation.
+	 * 
+	 * @param buffer
+	 *            The input buffer
+	 * @param offset
+	 *            The offset into the input buffer at which the parameter value
+	 *            begins
+	 * @param length
+	 *            The length of the parameter
+	 */
+	public void setModulus(byte[] buffer, short offset, short length) {
+		((RSAPublicKey) key.getPublic()).setModulus(buffer, offset, length);
 	}
 }
