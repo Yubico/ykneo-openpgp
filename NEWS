@@ -2,6 +2,8 @@ ykneo-openpgp NEWS -- History of changes.
 
 * Version 1.0.4 (unreleased)
 
+** Set public exponent and modulus on key import (Fixes READKEY).
+
 * Version 1.0.3 (released 2013-08-15)
 
 ** Added tool to import key using opensc commands, see util/.
