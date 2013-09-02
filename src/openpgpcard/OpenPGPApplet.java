@@ -1090,7 +1090,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	 * @param apdu
 	 */
 	private void importKey(APDU apdu) {
-		// TODO The following code still has to be tested
 		short offset = 0;
 
 		if (!pw3.isValidated())
