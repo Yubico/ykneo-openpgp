@@ -51,8 +51,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] VERSION = { 0x01, 0x00, 0x05 };
 
 	private static final byte[] EXTENDED_CAP = { 
-			(byte) 0xD0, // Support for GET CHALLENGE
-						 // No support for Key Import
+			(byte) 0xF0, // Support for GET CHALLENGE
+						 // Support for Key Import
 						 // PW1 Status byte changeable
 			0x00, // Secure messaging using 3DES
 			0x00, (byte) 0xFF, // Maximum length of challenges
