@@ -102,7 +102,7 @@ To build the .cap file, expand and right click on the "openpgpcard"
 sub-directory and select "Java Card Tools" and then "Convert".  The
 CAP file will be available in your Eclipse workspace as:
 
-  javacardopenpgp/bin/openpgpcard/javacard/openpgpcard.cap
+  ./bin/openpgpcard/javacard/openpgpcard.cap
 
 Installing CAP file to NEO
 --------------------------
@@ -123,9 +123,7 @@ Then install the gpshell tool from Global Platform:
   http://sourceforge.net/projects/globalplatform/
 
 The projects that are needed is the GlobalPlatform Library 6.0.0,
-GPShell 1.4.4, and gppcscconnectionplugin which doesn't seem to be
-available in any released tarball so you have to get it from
-Subversion.
+GPShell 1.4.4, and gppcscconnectionplugin 1.1.0.
 
 You need to whitelist the device in /etc/libccid_Info.plist.
 
