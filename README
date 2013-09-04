@@ -104,12 +104,11 @@ CAP file will be available in your Eclipse workspace as:
 
   ./bin/openpgpcard/javacard/openpgpcard.cap
 
-Installing CAP file to NEO
---------------------------
+Enable CCID mode on the NEO
+---------------------------
 
-For loading the applet onto the card first make sure the YubiKey NEO
-is in the HID/CCID or CCID mode, using ykpers from the YubiKey
-Personalization tool:
+First make sure the YubiKey NEO is in the HID/CCID or CCID mode, using
+ykpers from the YubiKey Personalization tool:
 
   http://code.google.com/p/yubikey-personalization/
   https://github.com/Yubico/yubikey-personalization
@@ -117,6 +116,13 @@ Personalization tool:
 For example:
 
   sudo ykpersonalize -m82
+
+Eject and re-insert the NEO to restart it in the new USB mode.  You
+should then have a USB device like 1050:0111 or 1050:0112.  The
+1050:0110 device is HID only.
+
+Installing CAP file to NEO
+--------------------------
 
 Then install the gpshell tool from Global Platform:
 
@@ -126,6 +132,9 @@ The projects that are needed is the GlobalPlatform Library 6.0.0,
 GPShell 1.4.4, and gppcscconnectionplugin 1.1.0.
 
 You need to whitelist the device in /etc/libccid_Info.plist.
+
+WARNING!  When you load a new CAP file, everything on the device for
+that app is erased.  Keep a backup of your OpenPGP keys!
 
 When the CAP file has been built and is available in the path shown
 above, you may use the gpshell tool to load it:
