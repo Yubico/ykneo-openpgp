@@ -1,10 +1,10 @@
 bin/
-src/openpgpcard/javacard/
-.classpath
-.project
-.jcop
-.jcproject
-.settings/
+applet/src/openpgpcard/javacard/
+applet/.classpath
+applet/.project
+applet/.jcop
+applet/.jcproject
+applet/.settings/
 util/*.pyc
 ykneo-openpgp-*.cap
 ykneo-openpgp-*.cap.sig

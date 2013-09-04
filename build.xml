@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <project name="ykneo-openpgp" default="convert" basedir=".">
   <description>Ant build for ykneo-openpgp applet</description>
-  <property name="src" location="src"/>
-  <property name="build" location="bin"/>
+  <property name="src" location="applet/src"/>
+  <property name="build" location="applet/bin"/>
   <!-- Load user specified extra properties -->
   <property file="${user.home}/javacard.properties"/>
   <property name="JAVA_PACKAGE" value="openpgpcard"/>
