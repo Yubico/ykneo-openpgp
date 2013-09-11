@@ -27,25 +27,34 @@ import javacard.security.*;
  *          $LastChangedDate: 2012-02-23 15:31:33 +0100 (tor, 23 feb 2012) $
  */
 public class PGPKey implements ISO7816 {
-	public static final short KEY_SIZE = 2048;// 2368;
-	public static final short KEY_SIZE_BYTES = KEY_SIZE / 8;
-	public static final short EXPONENT_SIZE = 17;
+	public static final byte ALGO_RSA = 1;
+	
 	public static final short EXPONENT_SIZE_BYTES = 3;
 	public static final short FP_SIZE = 20;
+	
+	public static final byte FORMAT_CRT_M = 3;
 
 	private KeyPair key;
 	private byte[] fp;
 	private byte[] time = { 0x00, 0x00, 0x00, 0x00 };
-	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, 0x03 };
-
+	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, FORMAT_CRT_M };
+	
 	public PGPKey() {
-		key = new KeyPair(KeyPair.ALG_RSA_CRT, KEY_SIZE);
+		this(ALGO_RSA, (short)2048, (short)17);
+	}
+	
+	public PGPKey(byte algorithm, short key_size, short exponent_size) {
+		if(algorithm != 1) {
+			ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+		}
+		key = new KeyPair(KeyPair.ALG_RSA_CRT, key_size);
 
 		fp = new byte[FP_SIZE];
 		Util.arrayFillNonAtomic(fp, (short) 0, (short) fp.length, (byte) 0);
 
-		Util.setShort(attributes, (short) 1, KEY_SIZE);
-		Util.setShort(attributes, (short) 3, EXPONENT_SIZE);
+		attributes[0] = algorithm;
+		Util.setShort(attributes, (short) 1, key_size);
+		Util.setShort(attributes, (short) 3, exponent_size);
 	}
 
 	/**
@@ -154,7 +163,7 @@ public class PGPKey implements ISO7816 {
 	 * @return Length in bytes of the modulus
 	 */
 	public short getModulusLength() {
-		return KEY_SIZE_BYTES;
+		return (short) (key.getPrivate().getSize() / 8);
 	}
 
 	/**

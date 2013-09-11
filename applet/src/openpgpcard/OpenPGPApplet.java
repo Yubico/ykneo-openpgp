@@ -51,9 +51,12 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] VERSION = { 0x01, 0x00, 0x05 };
 
 	private static final byte[] EXTENDED_CAP = { 
-			(byte) 0xF0, // Support for GET CHALLENGE
+			(byte) 0xF4, // Support for Secure messaging
+						 // Support for GET CHALLENGE
 						 // Support for Key Import
 						 // PW1 Status byte changeable
+						 // No support for private DO
+						 // Algorithm attributes changeable
 			0x00, // Secure messaging using 3DES
 			0x00, (byte) 0xFF, // Maximum length of challenges
 			0x00, (byte) 0xFF, // Maximum length Cardholder Certificate
@@ -948,6 +951,39 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			cert_length = Util.arrayCopy(buffer, _0, cert, _0, in_received);
 			JCSystem.commitTransaction();
 			break;
+			
+		// C1 - Algorithm Attributes Signature
+		// C2 - Algorithm Attributes Decryption
+		// C3 - Algorithm Attributes Authentication			
+		case (short) 0x00C1:
+		case (short) 0x00C2:
+		case (short) 0x00C3:
+		{
+			byte algorithm;
+			short key_size;
+			short exponent_size;
+			byte key_format;
+			if (in_received != 6) {
+				ISOException.throwIt(SW_WRONG_LENGTH);
+			}
+			algorithm = buffer[0];
+			key_size = Util.getShort(buffer, (short) 1);
+			exponent_size = Util.getShort(buffer, (short) 3);
+			key_format = buffer[5];
+			if(algorithm != PGPKey.ALGO_RSA && key_format != PGPKey.FORMAT_CRT_M) {
+				ISOException.throwIt(SW_WRONG_DATA);
+			}
+			PGPKey key = new PGPKey(algorithm, key_size, exponent_size);
+			if(tag == 0x00C1) {
+				sig_key = key;
+			} else if(tag == 0x00C2) {
+				dec_key = key;
+			} else { // C3
+				auth_key = key;
+			}
+			JCSystem.requestObjectDeletion();
+		}
+		break;
 
 		// C4 - PW Status Bytes
 		case (short) 0x00C4:
