@@ -57,7 +57,7 @@ JCKit.  For example:
 
 The cap file for loading on card will be at:
 
- ./bin/openpgpcard/javacard/openpgpcard.cap
+ ./applet/bin/openpgpcard/javacard/openpgpcard.cap
 
 Eclipe and eclipse-jcde
 -----------------------
@@ -102,7 +102,7 @@ To build the .cap file, expand and right click on the "openpgpcard"
 sub-directory and select "Java Card Tools" and then "Convert".  The
 CAP file will be available in your Eclipse workspace as:
 
-  ./bin/openpgpcard/javacard/openpgpcard.cap
+  ./applet/bin/openpgpcard/javacard/openpgpcard.cap
 
 Enable CCID mode on the NEO
 ---------------------------
