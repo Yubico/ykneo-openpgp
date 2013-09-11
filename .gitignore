@@ -10,3 +10,5 @@ ykneo-openpgp-*.cap
 ykneo-openpgp-*.cap.sig
 ykneo-openpgp-*.tar.gz
 ykneo-openpgp-*.tar.gz.sig
+test/.classpath
+test/.project
