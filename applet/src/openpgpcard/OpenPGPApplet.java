@@ -589,7 +589,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
 				(short) (in_received - 1));
 
-		dec_key.initCipher(cipher, Cipher.MODE_ENCRYPT);
+		dec_key.initCipher(cipher, Cipher.MODE_DECRYPT);
 
 		return cipher.doFinal(tmp, _0, length, buffer, _0);
 	}
