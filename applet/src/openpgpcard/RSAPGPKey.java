@@ -34,6 +34,8 @@ public class RSAPGPKey extends PGPKey {
 	private byte[] time = { 0x00, 0x00, 0x00, 0x00 };
 	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, FORMAT_CRT_M };
 	
+	private static Cipher cipher = null;
+
 	public static final short EXPONENT_SIZE_BYTES = 3;
 	public static final byte FORMAT_CRT_M = 3;
 	
@@ -45,6 +47,11 @@ public class RSAPGPKey extends PGPKey {
 		key = new KeyPair(KeyPair.ALG_RSA_CRT, key_size);
 
 		fp = new byte[FP_SIZE];
+		
+		if(cipher == null) {
+			cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+		}
+		
 		Util.arrayFillNonAtomic(fp, (short) 0, (short) fp.length, (byte) 0);
 
 		Util.setShort(attributes, (short) 1, key_size);
@@ -156,10 +163,6 @@ public class RSAPGPKey extends PGPKey {
 		return getPrivate().isInitialized();
 	}
 
-	public void initCipher(Cipher cipher, byte mode) {
-		cipher.init(getPrivate(), mode);
-	}
-
 	public short getPublicKey(byte[] data, short offset) {
 		// 81 - Modulus
 		data[offset++] = (byte) 0x81;
@@ -256,5 +259,17 @@ public class RSAPGPKey extends PGPKey {
 
 		getPublic().setModulus(data, offset_data, len_modulus);
 		offset_data += len_modulus;
+	}
+
+	public short decrypt(byte[] inData, short inOffs, short inLen,
+			byte[] outData, short outOffs) {
+		cipher.init(getPrivate(), Cipher.MODE_DECRYPT);
+		return cipher.doFinal(inData, inOffs, inLen, outData, outOffs);
+	}
+
+	public short sign(byte[] inData, short inOffs, short inLen, byte[] outData,
+			short outOffs) {
+		cipher.init(getPrivate(), Cipher.MODE_ENCRYPT);
+		return cipher.doFinal(inData, inOffs, inLen, outData, outOffs);
 	}
 }

@@ -22,7 +22,6 @@ package openpgpcard;
 import javacard.framework.ISO7816;
 import javacard.framework.ISOException;
 import javacard.framework.Util;
-import javacardx.crypto.Cipher;
 
 public abstract class PGPKey implements ISO7816 {
 	public static final byte ALGO_RSA = 1;
@@ -49,11 +48,12 @@ public abstract class PGPKey implements ISO7816 {
 	public abstract void genKeyPair();
 	public abstract short getAttributes(byte[] data, short offset);
 	public abstract boolean isInitialized();
-	public abstract void initCipher(Cipher cipher, byte mode);
 	public abstract short getFingerprint(byte[] data, short offset);
 	public abstract short getTime(byte[] data, short offset);
 	public abstract void setFingerprint(byte[] data, short offset);
 	public abstract void setTime(byte[] data, short offset);
 	public abstract short getPublicKey(byte[] data, short offset);
 	public abstract void setPrivateKey(byte[] data, short offset);
+	public abstract short decrypt(byte[] inData, short inOffs, short inLen, byte[] outData, short outOffs);
+	public abstract short sign(byte[] inData, short inOffs, short inLen, byte[] outData, short outOffs);
 }

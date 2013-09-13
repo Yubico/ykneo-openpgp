@@ -21,7 +21,6 @@ package openpgpcard;
 
 import javacard.framework.*;
 import javacard.security.*;
-import javacardx.crypto.*;
 
 /**
  * AID of the applet should be according to the OpenPGP card standard v2.0.1 
@@ -136,7 +135,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 			0x00 };
 
-	private Cipher cipher;
 	private RandomData random;
 
 	private byte[] tmp;
@@ -185,8 +183,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		dec_key = PGPKey.getInstance();
 		auth_key = PGPKey.getInstance();
 
-		//
-		cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 		
 		// Initialize Secure Messaging
@@ -561,11 +557,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		// Copy data to be signed to tmp
 		short length = Util
 				.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
-		sig_key.initCipher(cipher, Cipher.MODE_ENCRYPT);
+		
 		increaseDSCounter();
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		return sig_key.sign(tmp, _0, length, buffer, _0);
 	}
 
 	/**
@@ -589,9 +583,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
 				(short) (in_received - 1));
 
-		dec_key.initCipher(cipher, Cipher.MODE_DECRYPT);
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		return dec_key.decrypt(tmp, _0, length, buffer, _0);
 	}
 
 	/**
@@ -611,8 +603,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!auth_key.isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		auth_key.initCipher(cipher, Cipher.MODE_ENCRYPT);
-		return cipher.doFinal(tmp, _0, in_received, buffer, _0);
+		// is sign really what we want here?
+		return auth_key.sign(tmp, _0, in_received, buffer, _0);
 	}
 
 	/**
