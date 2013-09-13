@@ -30,10 +30,7 @@ import javacardx.crypto.Cipher;
  */
 public class RSAPGPKey extends PGPKey {
 	private KeyPair key;
-	private byte[] fp;
-	private byte[] time = { 0x00, 0x00, 0x00, 0x00 };
 	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, FORMAT_CRT_M };
-	
 	private static Cipher cipher = null;
 
 	public static final short EXPONENT_SIZE_BYTES = 3;
@@ -45,15 +42,11 @@ public class RSAPGPKey extends PGPKey {
 	
 	public RSAPGPKey(short key_size, short exponent_size) {
 		key = new KeyPair(KeyPair.ALG_RSA_CRT, key_size);
-
-		fp = new byte[FP_SIZE];
 		
 		if(cipher == null) {
 			cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		}
 		
-		Util.arrayFillNonAtomic(fp, (short) 0, (short) fp.length, (byte) 0);
-
 		Util.setShort(attributes, (short) 1, key_size);
 		Util.setShort(attributes, (short) 3, exponent_size);
 	}
@@ -63,65 +56,6 @@ public class RSAPGPKey extends PGPKey {
 	 */
 	public void genKeyPair() {
 		key.genKeyPair();
-	}
-
-	/**
-	 * Set the fingerprint for the public key.
-	 * 
-	 * @param data
-	 *            Byte array
-	 * @param offset
-	 *            Offset within byte array containing first byte
-	 */
-	public void setFingerprint(byte[] data, short offset) {
-		// Check whether there are enough bytes to copy
-		if ((short) (offset + fp.length) > data.length)
-			ISOException.throwIt(SW_UNKNOWN);
-
-		Util.arrayCopyNonAtomic(data, offset, fp, (short) 0, (short) fp.length);
-	}
-
-	/**
-	 * Set the generation time for the key pair.
-	 * 
-	 * @param data
-	 *            Byte array
-	 * @param offset
-	 *            Offset within byte array containing first byte
-	 */
-	public void setTime(byte[] data, short offset) {
-		// Check whether there are enough bytes to copy
-		if ((short) (offset + time.length) > data.length)
-			ISOException.throwIt(SW_UNKNOWN);
-
-		Util.arrayCopyNonAtomic(data, offset, time, (short) 0, (short) 4);
-	}
-
-	/**
-	 * Get the fingerprint for the public key.
-	 * 
-	 * @param data
-	 *            Byte array
-	 * @param offset
-	 *            Offset within byte array indicating first byte
-	 */
-	public short getFingerprint(byte[] data, short offset) {
-		Util.arrayCopyNonAtomic(fp, (short) 0, data, offset, (short) fp.length);
-		return (short) (offset + fp.length);
-	}
-
-	/**
-	 * Get the generation time for the key pair.
-	 * 
-	 * @param data
-	 *            Byte array
-	 * @param offset
-	 *            Offset within byte array indicating first byte
-	 */
-	public short getTime(byte[] data, short offset) {
-		Util.arrayCopyNonAtomic(time, (short) 0, data, offset,
-				(short) time.length);
-		return (short) (offset + time.length);
 	}
 
 	/**
