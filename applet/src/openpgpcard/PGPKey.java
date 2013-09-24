@@ -25,6 +25,9 @@ import javacard.framework.Util;
 
 public abstract class PGPKey implements ISO7816 {
 	public static final byte ALGO_RSA = 1;
+	public static final byte ALDO_ECDH = 0x12;
+	public static final byte ALGO_ECDSA = 0x13;
+
 	public static final short FP_SIZE = 20;
 	
 	private byte[] fp;
@@ -37,7 +40,7 @@ public abstract class PGPKey implements ISO7816 {
 	
 	public static PGPKey getInstance() {
 		// the default
-		return new RSAPGPKey();
+		return new ECCPGPKey();
 	}
 	
 	public static PGPKey getInstance(byte[] data, short offset) {
