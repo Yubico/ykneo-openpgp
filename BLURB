@@ -1,0 +1,7 @@
+Author: Yubico
+Basename: ykneo-openpgp
+Homepage: http://opensource.yubico.com/ykneo-openpgp/
+License: GPL-2.0+
+Name: ykneo-openpgp
+Project: ykneo-openpgp
+Summary: OpenPGP app for the YubiKey NEO
