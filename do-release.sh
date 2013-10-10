@@ -21,7 +21,7 @@ if ! head -3 NEWS  | grep -q "Version $VERSION .released `date -I`"; then
   exit
 fi
 
-if ! cat src/openpgpcard/OpenPGPApplet.java | grep -q "VERSION = { `echo $VERSION | awk -F. '{print "0x0" $1 ", 0x0"$2 ", 0x0"$3}'`"; then
+if ! cat applet/src/openpgpcard/OpenPGPApplet.java | grep -q "VERSION = { `echo $VERSION | awk -F. '{print "0x0" $1 ", 0x0"$2 ", 0x0"$3}'`"; then
   echo "You need to update version in OpenPGPApplet.java"
   exit
 fi
@@ -43,7 +43,7 @@ tar -cz --directory=$tmpdir --file=${releasename}.tar.gz $releasename
 cd $releasedir
 ant -q -DJAVACARD_HOME=$JAVACARD_HOME
 cd -
-cp $releasedir/bin/openpgpcard/javacard/openpgpcard.cap ${releasename}.cap
+cp $releasedir/applet/bin/openpgpcard/javacard/openpgpcard.cap ${releasename}.cap
 gpg --detach-sign --default-key $PGP_KEYID ${releasename}.tar.gz
 gpg --detach-sign --default-key $PGP_KEYID ${releasename}.cap
 $YUBICO_GITHUB_REPO/publish ykneo-openpgp $VERSION ${releasename}.tar.gz*
