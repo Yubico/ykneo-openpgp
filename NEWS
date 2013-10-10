@@ -1,6 +1,6 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.5 (unreleased)
+* Version 1.0.5 (released 2013-10-10)
 
 ** Advertise support for Key Import.
 Requires GnuPG 2.0.22 or later, because only RSA CRT is supported.
