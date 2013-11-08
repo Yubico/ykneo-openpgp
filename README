@@ -35,17 +35,14 @@ We usually suggest using Ant.
 Installing JCKit
 ----------------
 
-Install the Java Card Development Kit version 2.2.2, download it from:
+Install the Java Card Classic Development Kit version 3.0.4, download it from:
 
-  http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html#java_card_kit-2.2.2-oth-JPR
+  http://www.oracle.com/technetwork/java/javame/javacard/download/devkit/index.html
 
-Unpack it into a new directory called for example "jckit" folder:
+The download is a Java installer so start it and install the package
+into a folder called for example "jckit3":
 
-  $ mkdir jckit
-  $ cd jckit
-  $ unzip /path/to/java_card_kit-2_2_2-linux.zip
-  $ cd java_card_kit-2_2_2/
-  $ unzip java_card_kit-2_2_2-rr-bin-linux-do.zip
+  $ java -jar java_card_kit-classic-3_0_4-rr-bin-do-b28-windows-06_sep_2011.jar
 
 Ant
 ---
@@ -53,7 +50,7 @@ Ant
 The project can now be built by invoking ant, supplying the path to
 JCKit.  For example:
 
-  ant -DJAVACARD_HOME=/path/to/jckit/java_card_kit-2_2_2/
+  ant -DJAVACARD_HOME=/path/to/jckit3/
 
 The cap file for loading on card will be at:
 
