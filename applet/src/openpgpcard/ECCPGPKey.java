@@ -30,6 +30,7 @@ public class ECCPGPKey extends PGPKey {
 	}
 
 	public short getAttributes(byte[] data, short offset) {
+		data[offset++] = (byte) attributes.length;
 		return Util.arrayCopy(attributes, (short)0, data, offset, (short) attributes.length);
 	}
 
@@ -45,7 +46,7 @@ public class ECCPGPKey extends PGPKey {
 		data[offset++] = (byte) 0x86;
 		ECPublicKey pubKey = getPublic();
 		data[offset++] = 65; // XXX: for secp256r1 
-		pubKey.getW(data, offset);
+		offset += pubKey.getW(data, offset);
 		return offset;
 	}
 	
@@ -72,5 +73,4 @@ public class ECCPGPKey extends PGPKey {
 		// TODO Auto-generated method stub
 		return 0;
 	}
-
 }

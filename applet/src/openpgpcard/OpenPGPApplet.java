@@ -179,9 +179,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		pw3_length = (byte) PW3_DEFAULT.length;
 
 		// Create empty keys
-		sig_key = PGPKey.getInstance();
-		dec_key = PGPKey.getInstance();
-		auth_key = PGPKey.getInstance();
+		sig_key = PGPKey.getInstance(PGPKey.ALGO_RSA);
+		dec_key = PGPKey.getInstance(PGPKey.ALGO_RSA);
+		auth_key = PGPKey.getInstance(PGPKey.ALGO_ECDSA);
 
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 		
@@ -756,17 +756,15 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			// C1 - Algorithm attributes signature
 			buffer[offset++] = (byte) 0xC1;
-			buffer[offset++] = (byte) 0x06;
 			offset = sig_key.getAttributes(buffer, offset);
+			
 
 			// C2 - Algorithm attributes decryption
 			buffer[offset++] = (byte) 0xC2;
-			buffer[offset++] = (byte) 0x06;
 			offset = dec_key.getAttributes(buffer, offset);
 
 			// C3 - Algorithm attributes authentication
 			buffer[offset++] = (byte) 0xC3;
-			buffer[offset++] = (byte) 0x06;
 			offset = auth_key.getAttributes(buffer, offset);
 
 			// C4 - PW1 Status bytes
@@ -1142,7 +1140,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		buffer[offset++] = 0x7F;
 		buffer[offset++] = 0x49;
 
-		if (len < 256) {
+		if (len < 128) {
+			buffer[offset++] = (byte) len;
+		} else if (len < 256) {
 			buffer[offset++] = (byte) 0x81;
 			buffer[offset++] = (byte) len;
 		} else {

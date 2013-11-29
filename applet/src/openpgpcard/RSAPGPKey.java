@@ -67,6 +67,7 @@ public class RSAPGPKey extends PGPKey {
 	 *            Offset within byte array indicating first byte
 	 */
 	public short getAttributes(byte[] data, short offset) {
+		data[offset++] = (byte) attributes.length;
 		return Util.arrayCopyNonAtomic(attributes, (short) 0, data, offset,
 				(short) attributes.length);
 	}

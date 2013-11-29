@@ -43,6 +43,15 @@ public abstract class PGPKey implements ISO7816 {
 		return new ECCPGPKey();
 	}
 	
+	public static PGPKey getInstance(byte type) {
+		if(type == ALGO_RSA) {
+			return new RSAPGPKey();
+		} else if(type == ALGO_ECDSA) {
+			return new ECCPGPKey();
+		}
+		return null;
+	}
+	
 	public static PGPKey getInstance(byte[] data, short offset) {
 		byte algorithm = data[offset++];
 		if(algorithm == ALGO_RSA) {
@@ -124,4 +133,6 @@ public abstract class PGPKey implements ISO7816 {
 				(short) time.length);
 		return (short) (offset + time.length);
 	}
+
+
 }
