@@ -18,30 +18,34 @@ package openpgpcardTest;
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertArrayEquals;
-import javacard.framework.APDU;
-
+import javacard.framework.AID;
 import openpgpcard.OpenPGPApplet;
 
-import org.junit.Test;
 import org.junit.Before;
+import org.junit.Test;
+
+import com.licel.jcardsim.base.Simulator;
 
 public class OpenPGPAppletTest {
-	OpenPGPApplet openPGPApplet;
+	Simulator simulator;
+	static final byte[] pgpAid = new byte[] {(byte) 0xa0, 0x00, 0x00, 0x05, 0x27, 0x21, 0x01, 0x01};
+	static final AID aid = new AID(pgpAid, (short)0, (byte)pgpAid.length);
 	
 	@Before
 	public void setup() {
-		openPGPApplet = new OpenPGPApplet();
+		byte[] params = new byte[pgpAid.length + 1];
+		params[0] = (byte) pgpAid.length;
+		System.arraycopy(pgpAid, 0, params, 1, pgpAid.length);
+		
+		simulator = new Simulator();
+		simulator.resetRuntime();
+		simulator.installApplet(aid, OpenPGPApplet.class, params, (short)0, (byte) params.length);
+		simulator.selectApplet(aid);
 	}
 
 	@Test
 	public void testVerify() {
-		byte[] buf = new byte[256];
-		System.arraycopy(new byte[] {
-				0x00, 0x20, 0x00, (byte) 0x81, 0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36
-		}, 0, buf, 0, 11);
-		APDU apdu = new APDU(buf);
-		openPGPApplet.process(apdu);
+		byte[] command = {0x00, 0x20, 0x00, (byte) 0x81, 0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
+		simulator.transmitCommand(command);
 	}
 }
