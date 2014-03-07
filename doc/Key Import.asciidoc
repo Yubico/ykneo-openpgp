@@ -1,17 +1,24 @@
 = Importing keys to ykneo-openpgp
 
 == Introduction
+
 This is a short description of how to setup the ykneo-openpgp applet with an
 already existing pgp key.
+
+== Prerequisites
+
 For this procedure to work you must have GnuPG version 2.0.22 or later installed.
+If you have an existing key you want to import, that key must be a RSA 2048
+bit key.
 
 == Generate a key
+
 Skip this step if you already have a key.
 
 ....
  $ gnupg --gen-key
  
- gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
+ gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
  There is NO WARRANTY, to the extent permitted by law.
  
@@ -95,7 +102,7 @@ Here we will add an authentication key to the previously generate key.
 ....
  $ gnugp --expert --edit-key 13AFCE85
 
- gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
+ gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
  There is NO WARRANTY, to the extent permitted by law.
 
@@ -186,7 +193,7 @@ Now it's time to import the key into the ykneo-openpgp applet.
 ....
  $ gpg --edit-key 13AFCE85
 
- gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
+ gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
  There is NO WARRANTY, to the extent permitted by law.
 
