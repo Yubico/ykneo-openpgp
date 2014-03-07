@@ -23,7 +23,8 @@ Skip this step if you already have a key.
  Your selection?
 ....
 
-We want RSA and RSA, so 1
+The ykneo-openpgp applet currently only supports RSA keys of 2048 bits length. So
+here we select 1, and go with the default of 2048 bits on the next question.
 
 ....
  RSA keys may be between 1024 and 4096 bits long.
