@@ -8,21 +8,24 @@ For this procedure to work you must have GnuPG version 2.0.22 or later installed
 == Generate a key
 Skip this step if you already have a key.
 
+....
  $ gnupg --gen-key
-
+ 
  gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
  There is NO WARRANTY, to the extent permitted by law.
-
+ 
  Please select what kind of key you want:
     (1) RSA and RSA (default)
     (2) DSA and Elgamal
-       (3) DSA (sign only)
+    (3) DSA (sign only)
     (4) RSA (sign only)
  Your selection?
+....
 
 We want RSA and RSA, so 1
 
+....
  RSA keys may be between 1024 and 4096 bits long.
  What keysize do you want? (2048)
 
@@ -34,6 +37,7 @@ We want RSA and RSA, so 1
        <n>m = key expires in n months
        <n>y = key expires in n years
  Key is valid for? (0)
+....
 
 Select an expiry date if you want to. And answer that the data is correct.
 
@@ -49,13 +53,16 @@ Should be the email adress associated with this key.
 
 May be a comment attached to the key if you want, or leave this empty.
 
+....
  You selected this USER-ID:
      "Foo Bar <foo@example.com>"
 
  Change (N)ame, (C)omment, (E)mail or (O)kay/(Q)uit?
+....
 
 If you're happy with this USER-ID answer O for okay.
 
+....
  We need to generate a lot of random bytes. It is a good idea to perform
  some other action (type on the keyboard, move the mouse, utilize the
  disks) during the prime generation; this gives the random number
@@ -76,6 +83,7 @@ If you're happy with this USER-ID answer O for okay.
        Key fingerprint = 743A 2D58 688A 9E9E B4FC  493F 70D1 D7A8 13AF CE85
  uid                  Foo Bar <foo@example.com>
  sub   2048R/D7421CDF 2014-03-07 [expires: 2014-06-15]
+....
 
 Take note of the id of the key, in this case 13AFCE85.
 
@@ -83,6 +91,7 @@ Take note of the id of the key, in this case 13AFCE85.
 
 Here we will add an authentication key to the previously generate key.
 
+....
  $ gnugp --expert --edit-key 13AFCE85
 
  gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
@@ -108,9 +117,11 @@ Here we will add an authentication key to the previously generate key.
     (7) DSA (set your own capabilities)
     (8) RSA (set your own capabilities)
  Your selection?
+....
 
 Here we select 8 to get another RSA key attached to our key.
 
+....
  Possible actions for a RSA key: Sign Encrypt Authenticate
  Current allowed actions: Sign Encrypt
 
@@ -120,6 +131,7 @@ Here we select 8 to get another RSA key attached to our key.
     (Q) Finished
 
  Your selection?
+....
 
 Select A, then S, then E to get a pure authentication key. Then Q to continue.
 
@@ -128,6 +140,7 @@ Select A, then S, then E to get a pure authentication key. Then Q to continue.
 
 Again we want a 2048 bit key.
 
+....
  Requested keysize is 2048 bits
  Please specify how long the key should be valid.
           0 = key does not expire
@@ -136,9 +149,11 @@ Again we want a 2048 bit key.
        <n>m = key expires in n months
        <n>y = key expires in n years
  Key is valid for? (0)
+....
 
 Select same expiry as for the rest of the key and then answer y.
 
+....
  Is this correct? (y/N) y
  Really create? (y/N) y
  We need to generate a lot of random bytes. It is a good idea to perform
@@ -153,6 +168,7 @@ Select same expiry as for the rest of the key and then answer y.
  [ultimate] (1). Foo Bar <foo@example.com>
 
  gpg> Save changes? (y/N) y
+....
 
 == Backup
 
@@ -166,6 +182,7 @@ Make sure to store the backup offline in a secure place.
 
 Now it's time to import the key into the ykneo-openpgp applet.
 
+....
  $ gpg --edit-key 13AFCE85
 
  gpg (GnuPG) 2.0.20; Copyright (C) 2013 Free Software Foundation, Inc.
@@ -197,9 +214,11 @@ Now it's time to import the key into the ykneo-openpgp applet.
     (1) Signature key
     (3) Authentication key
  Your selection? 1
+....
 
 Here we've just moved the primary key to the Signature sport of the applet.
 
+....
  gpg> key 1
 
  sec  2048R/13AFCE85  created: 2014-03-07  expires: 2014-06-15
@@ -216,9 +235,11 @@ Here we've just moved the primary key to the Signature sport of the applet.
  Please select where to store the key:
     (2) Encryption key
  Your selection? 2
+....
 
 And here we've moved the Encryption key.
 
+....
  gpg> key 1
 
  sec  2048R/13AFCE85  created: 2014-03-07  expires: 2014-06-15
@@ -245,6 +266,7 @@ And here we've moved the Encryption key.
  Please select where to store the key:
     (3) Authentication key
  Your selection? 3
+....
 
 And as a last step we've now moved the Authentication key to the applet.
 
