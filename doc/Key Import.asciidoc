@@ -7,7 +7,18 @@ already existing pgp key.
 
 == Prerequisites
 
-For this procedure to work you must have GnuPG version 2.0.22 or later installed.
+For this procedure to work you must have GnuPG version 2.0.22 or later installed
+and the applet version must be 1.0.5 or later. To check the applet version you
+may run:
+
+....
+ $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye 
+ D[0000]  01 00 05 90 00                                     .....           
+ OK
+....
+
+Where "01 00 05" means version 1.0.5.
+
 If you have an existing key you want to import, that key must be a RSA 2048
 bit key.
 
