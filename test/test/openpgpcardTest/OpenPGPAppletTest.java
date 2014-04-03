@@ -18,6 +18,7 @@ package openpgpcardTest;
 * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 */
 
+import static org.junit.Assert.assertEquals;
 import javacard.framework.AID;
 import openpgpcard.OpenPGPApplet;
 
@@ -45,7 +46,39 @@ public class OpenPGPAppletTest {
 
 	@Test
 	public void testVerify() {
-		byte[] command = {0x00, 0x20, 0x00, (byte) 0x81, 0x06, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36};
+		assertEquals(true, doVerify("123456", (byte) 0x81));
+	}
+	
+	@Test
+	public void testGenerate() {
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb6};
 		simulator.transmitCommand(command);
+	}
+
+	private boolean doVerify(String pin, byte mode) {
+		byte[] command = new byte[5 + pin.length()];
+		command[1] = 0x20;
+		command[3] = mode;
+		command[4] = (byte) pin.length();
+		int offs = 5;
+		for(byte b : pin.getBytes()) {
+			command[offs++] = b;
+		}
+		byte[] resp = simulator.transmitCommand(command);
+		if(resp[0] == (byte)0x90 && resp[1] == 0x00) {
+			return true;
+		} else {
+			return false;
+		}
+	}
+	
+	@SuppressWarnings("unused")
+	private void dumpHex(byte[] data) {
+		String out = "";
+		for(byte b : data) {
+			out += String.format("0x%02x ", b);
+		}
+		System.out.println(out);
 	}
 }
