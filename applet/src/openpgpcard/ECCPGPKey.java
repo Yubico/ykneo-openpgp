@@ -7,9 +7,9 @@ import javacard.security.ECPublicKey;
 import javacard.security.KeyPair;
 
 public class ECCPGPKey extends PGPKey {
-	private KeyPair key;
+	private final KeyPair key;
 	private final byte[] oid;
-	private byte type;
+	private final byte type;
 	
 	public static final byte CURVE_P256R1 = 1;
 		
@@ -22,6 +22,7 @@ public class ECCPGPKey extends PGPKey {
 			key = SecP256r1.newKeyPair();
 			oid = SecP256r1.oid;
 		} else {
+			key = null;
 			oid = null;
 		}
 		this.type = type;
