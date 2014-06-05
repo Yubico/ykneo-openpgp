@@ -8,13 +8,13 @@ import javacard.security.KeyPair;
 
 public class ECCPGPKey extends PGPKey {
 	private KeyPair key;
-	private byte[] attributes;
 	private final byte[] oid;
+	private byte type;
 	
 	public static final byte CURVE_P256R1 = 1;
 		
-	public ECCPGPKey() {
-		this(PGPKey.ALGO_ECDSA, CURVE_P256R1);
+	public ECCPGPKey(byte type) {
+		this(type, CURVE_P256R1);
 	}
 	
 	public ECCPGPKey(byte type, byte curve) {
@@ -24,9 +24,7 @@ public class ECCPGPKey extends PGPKey {
 		} else {
 			oid = null;
 		}
-		attributes = new byte[(short)(oid.length + 1)];
-		attributes[0] = type;
-		Util.arrayCopyNonAtomic(oid, (short)0, attributes, (short)1, (short) oid.length);
+		this.type = type;
 	}
 
 	public void genKeyPair() {
@@ -34,8 +32,9 @@ public class ECCPGPKey extends PGPKey {
 	}
 
 	public short getAttributes(byte[] data, short offset) {
-		data[offset++] = (byte) attributes.length;
-		return Util.arrayCopy(attributes, (short)0, data, offset, (short) attributes.length);
+		data[offset++] = (byte) (oid.length + 1);
+		data[offset++] = type;
+		return Util.arrayCopy(oid, (short) 0, data, offset, (short) oid.length);
 	}
 
 	public boolean isInitialized() {
