@@ -1,15 +1,21 @@
 package openpgpcard;
 
+import com.nxp.id.jcopx.SignatureX;
+
 import javacard.framework.ISOException;
 import javacard.framework.Util;
 import javacard.security.ECPrivateKey;
 import javacard.security.ECPublicKey;
+import javacard.security.KeyAgreement;
 import javacard.security.KeyPair;
+import javacard.security.Signature;
 
 public class ECCPGPKey extends PGPKey {
 	private final KeyPair key;
 	private final byte[] oid;
 	private final byte type;
+	private static Signature signature = null;
+	private static KeyAgreement agreement = null;
 	
 	public static final byte CURVE_P256R1 = 1;
 		
@@ -26,6 +32,12 @@ public class ECCPGPKey extends PGPKey {
 			oid = null;
 		}
 		this.type = type;
+		
+		if(type == ALGO_ECDSA && signature == null) {
+			signature = SignatureX.getInstance(SignatureX.ALG_ECDSA_PLAIN, false);
+		} else if(type == ALGO_ECDH && agreement == null) {
+			agreement = KeyAgreement.getInstance(KeyAgreement.ALG_EC_SVDP_DH, false);
+		}
 	}
 
 	public void genKeyPair() {
@@ -92,14 +104,14 @@ public class ECCPGPKey extends PGPKey {
 	
 	public short decrypt(byte[] inData, short inOffs, short inLen,
 			byte[] outData, short outOffs) {
-		// TODO Auto-generated method stub
-		return 0;
+		agreement.init(getPrivate());
+		return agreement.generateSecret(inData, inOffs, inLen, outData, outOffs);
 	}
 
 	
 	public short sign(byte[] inData, short inOffs, short inLen, byte[] outData,
 			short outOffs) {
-		// TODO Auto-generated method stub
-		return 0;
+		signature.init(getPrivate(), Signature.MODE_SIGN);
+		return signature.sign(inData, inOffs, inLen, outData, outOffs);
 	}
 }
