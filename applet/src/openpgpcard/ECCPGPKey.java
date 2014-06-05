@@ -1,6 +1,8 @@
 package openpgpcard;
 
+import javacard.framework.ISOException;
 import javacard.framework.Util;
+import javacard.security.ECPrivateKey;
 import javacard.security.ECPublicKey;
 import javacard.security.KeyPair;
 
@@ -37,7 +39,7 @@ public class ECCPGPKey extends PGPKey {
 	}
 
 	public boolean isInitialized() {
-		return key.getPrivate().isInitialized();
+		return getPrivate().isInitialized();
 	}
 	
 	public short getPublicKey(byte[] data, short offset) {
@@ -47,19 +49,44 @@ public class ECCPGPKey extends PGPKey {
 		offset += oid.length;
 		data[offset++] = (byte) 0x86;
 		ECPublicKey pubKey = getPublic();
-		data[offset++] = 65; // XXX: for secp256r1 
-		offset += pubKey.getW(data, offset);
+		short publen = pubKey.getW(data, (short) (offset + 1));
+		data[offset++] = (byte) publen;
+		offset += publen;
 		return offset;
 	}
 	
 	private ECPublicKey getPublic() {
 		return (ECPublicKey) key.getPublic();
 	}
-
 	
-	public void setPrivateKey(byte[] data, short offset) {
-		// TODO Auto-generated method stub
+	private ECPrivateKey getPrivate() {
+		return (ECPrivateKey) key.getPrivate();
+	}
 
+	public void setPrivateKey(byte[] data, short offset) {
+		// Skip empty length of CRT
+		offset++;
+
+		// Check for tag 7F48
+		if (data[offset++] != 0x7F || data[offset++] != 0x48)
+			ISOException.throwIt(SW_DATA_INVALID);
+		short len_template = OpenPGPUtil.getLength(data, offset);
+		offset += OpenPGPUtil.getLengthBytes(len_template);
+
+		short offset_data = (short) (offset + len_template);
+
+		/* apparently tag 0x91 is used for ecc private key */
+		if (data[offset++] != (byte) 0x91)
+			ISOException.throwIt(SW_DATA_INVALID);
+		short len_e = OpenPGPUtil.getLength(data, offset);
+		offset += OpenPGPUtil.getLengthBytes(len_e);
+		
+		if (data[offset_data++] != 0x5F || data[offset_data++] != 0x48)
+			ISOException.throwIt(SW_DATA_INVALID);
+		offset_data += OpenPGPUtil.getLengthBytes(OpenPGPUtil.getLength(data, offset_data));
+		
+		getPrivate().setS(data, offset_data, len_e);
+		offset_data += len_e;
 	}
 
 	
