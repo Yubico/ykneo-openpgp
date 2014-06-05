@@ -25,7 +25,7 @@ import javacard.framework.Util;
 
 public abstract class PGPKey implements ISO7816 {
 	public static final byte ALGO_RSA = 1;
-	public static final byte ALDO_ECDH = 0x12;
+	public static final byte ALGO_ECDH = 0x12;
 	public static final byte ALGO_ECDSA = 0x13;
 
 	public static final short FP_SIZE = 20;
@@ -38,16 +38,11 @@ public abstract class PGPKey implements ISO7816 {
 		Util.arrayFillNonAtomic(fp, (short) 0, (short) fp.length, (byte) 0);
 	}
 	
-	public static PGPKey getInstance() {
-		// the default
-		return new ECCPGPKey();
-	}
-	
 	public static PGPKey getInstance(byte type) {
 		if(type == ALGO_RSA) {
 			return new RSAPGPKey();
-		} else if(type == ALGO_ECDSA) {
-			return new ECCPGPKey();
+		} else if(type == ALGO_ECDSA || type == ALGO_ECDH) {
+			return new ECCPGPKey(type);
 		}
 		return null;
 	}
