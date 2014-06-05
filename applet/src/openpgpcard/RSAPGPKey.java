@@ -29,7 +29,7 @@ import javacardx.crypto.Cipher;
  *          $LastChangedDate: 2012-02-23 15:31:33 +0100 (tor, 23 feb 2012) $
  */
 public class RSAPGPKey extends PGPKey {
-	private KeyPair key;
+	private final KeyPair key;
 	private byte[] attributes = { 0x01, 0x00, 0x00, 0x00, 0x00, FORMAT_CRT_M };
 	private static Cipher cipher = null;
 
