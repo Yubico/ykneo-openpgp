@@ -7,7 +7,7 @@ import javacard.security.KeyPair;
 public class ECCPGPKey extends PGPKey {
 	private KeyPair key;
 	private byte[] attributes;
-	private byte[] oid;
+	private final byte[] oid;
 	
 	public static final byte CURVE_P256R1 = 1;
 		
@@ -19,10 +19,12 @@ public class ECCPGPKey extends PGPKey {
 		if(curve == CURVE_P256R1) {
 			key = SecP256r1.newKeyPair();
 			oid = SecP256r1.oid;
+		} else {
+			oid = null;
 		}
-		attributes = new byte[(short)(SecP256r1.oid.length + 1)];
+		attributes = new byte[(short)(oid.length + 1)];
 		attributes[0] = type;
-		Util.arrayCopyNonAtomic(SecP256r1.oid, (short)0, attributes, (short)1, (short) SecP256r1.oid.length);
+		Util.arrayCopyNonAtomic(oid, (short)0, attributes, (short)1, (short) oid.length);
 	}
 
 	public void genKeyPair() {
