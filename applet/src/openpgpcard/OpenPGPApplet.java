@@ -72,6 +72,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static short NAME_MAX_LENGTH = 39;
 	private static short LANG_MAX_LENGTH = 8;
 	private static short CERT_MAX_LENGTH = 500;
+	
+	private static short FP_LENGTH = 20;
 
 	private static byte PW1_MIN_LENGTH = 6;
 	private static byte PW1_MAX_LENGTH = 127;
@@ -89,49 +91,43 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] PW3_DEFAULT = { 0x31, 0x32, 0x33, 0x34, 0x35,
 			0x36, 0x37, 0x38 };
 
-	private byte[] loginData = new byte[LOGINDATA_MAX_LENGTH];
-	private short loginData_length = 0;
+	private byte[] loginData;
+	private short loginData_length;
 
-	private byte[] url = new byte[URL_MAX_LENGTH];
-	private short url_length = 0;
+	private byte[] url;
+	private short url_length;
 
-	private byte[] name = new byte[NAME_MAX_LENGTH];
-	private short name_length = 0;
+	private byte[] name;
+	private short name_length;
 
-	private byte[] lang = new byte[LANG_MAX_LENGTH];
-	private short lang_length = 0;
+	private byte[] lang;
+	private short lang_length;
 
-	private byte[] cert = new byte[CERT_MAX_LENGTH];
-	private short cert_length = 0;
+	private byte[] cert;
+	private short cert_length;
 
-	private byte sex = 0x39;
+	private byte sex;
 
 	private OwnerPIN pw1;
-	private byte pw1_length = 0;
-	private byte pw1_status = 0x00;
+	private byte pw1_length;
+	private byte pw1_status;
 	private boolean[] pw1_modes;
 
 	private OwnerPIN rc;
-	private byte rc_length = 0;
+	private byte rc_length;
 
 	private OwnerPIN pw3;
-	private byte pw3_length = 0;
+	private byte pw3_length;
 
-	private byte[] ds_counter = { 0x00, 0x00, 0x00 };
+	private byte[] ds_counter;
 
 	private PGPKey sig_key;
 	private PGPKey dec_key;
 	private PGPKey auth_key;
 
-	private byte[] ca1_fp = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00 };
-	private byte[] ca2_fp = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00 };
-	private byte[] ca3_fp = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-			0x00 };
+	private byte[] ca1_fp;
+	private byte[] ca2_fp;
+	private byte[] ca3_fp;
 
 	private Cipher cipher;
 	private RandomData random;
@@ -150,27 +146,23 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private OpenPGPSecureMessaging sm;
 	private boolean sm_success = false;
 
+	private boolean terminated = false;
+
 	public static void install(byte[] bArray, short bOffset, byte bLength) {
 		new OpenPGPApplet().register(bArray, (short) (bOffset + 1),
                 bArray[bOffset]);
 	}
 
-	public OpenPGPApplet() {
-		// Create temporary arrays
-		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
-		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
-		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
-				JCSystem.CLEAR_ON_DESELECT);
-
+	private void initialize() {
 		// Initialize PW1 with default password
 		pw1 = new OwnerPIN((byte) 3, PW1_MAX_LENGTH);
 		pw1.update(PW1_DEFAULT, _0, (byte) PW1_DEFAULT.length);
 		pw1_length = (byte) PW1_DEFAULT.length;
+		pw1_status = 0x00;
 
 		// Initialize RC
 		rc = new OwnerPIN((byte) 3, RC_MAX_LENGTH);
+		rc_length = 0;
 
 		// Initialize PW3 with default password
 		pw3 = new OwnerPIN((byte) 3, PW3_MAX_LENGTH);
@@ -182,12 +174,41 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		dec_key = new PGPKey();
 		auth_key = new PGPKey();
 
-		//
+		// Initialize Secure Messaging
+		sm = new OpenPGPSecureMessaging();
+		
+		loginData = new byte[LOGINDATA_MAX_LENGTH];
+		loginData_length = 0;
+		url = new byte[URL_MAX_LENGTH];
+		url_length = 0;
+		name = new byte[NAME_MAX_LENGTH];
+		name_length = 0;
+		lang = new byte[LANG_MAX_LENGTH];
+		lang_length = 0;
+		cert = new byte[CERT_MAX_LENGTH];
+		cert_length = 0;
+		sex = 0x39;
+		
+		ds_counter = new byte[3];
+		
+		ca1_fp = new byte[FP_LENGTH];
+		ca2_fp = new byte[FP_LENGTH];
+		ca3_fp = new byte[FP_LENGTH];
+	}
+
+	public OpenPGPApplet() {
+		// Create temporary arrays
+		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
+				JCSystem.CLEAR_ON_DESELECT);
+		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
+				JCSystem.CLEAR_ON_DESELECT);
+		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
+				JCSystem.CLEAR_ON_DESELECT);
+
 		cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 		
-		// Initialize Secure Messaging
-		sm = new OpenPGPSecureMessaging();
+		initialize();
 	}
 
 	public void process(APDU apdu) {
@@ -229,6 +250,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			if (ins != (byte) 0xC0) {
 				out_sent = 0;
 				out_left = 0;
+			}
+			
+			if(terminated == true && ins != 0x44) {
+				ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
 			}
 	
 			// Other instructions
@@ -305,6 +330,26 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 					importKey(apdu);
 				} else {
 					ISOException.throwIt(SW_RECORD_NOT_FOUND);
+				}
+				break;
+				
+			// E6 - TERMINATE DF
+			case (byte) 0xE6:
+				if(pw1.getTriesRemaining() == 0 && pw3.getTriesRemaining() == 0) {
+					terminated = true;
+				} else {
+					ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+				}
+				break;
+			
+			// 44 - ACTIVATE FILE
+			case (byte) 0x44:
+				if(terminated == true) {
+					initialize();
+					terminated = false;
+					JCSystem.requestObjectDeletion();
+				} else {
+					ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
 				}
 				break;
 				
@@ -796,11 +841,11 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			buffer[offset++] = (byte) 0xC6;
 			buffer[offset++] = (short) 60;
 			offset = Util.arrayCopyNonAtomic(ca1_fp, _0, buffer, offset,
-					(short) 20);
+					FP_LENGTH);
 			offset = Util.arrayCopyNonAtomic(ca2_fp, _0, buffer, offset,
-					(short) 20);
+					FP_LENGTH);
 			offset = Util.arrayCopyNonAtomic(ca3_fp, _0, buffer, offset,
-					(short) 20);
+					FP_LENGTH);
 
 			// CD - Generation times of public key pair
 			buffer[offset++] = (byte) 0xCD;
@@ -987,7 +1032,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// CA - Fingerprint Certification Authority 1
 		case (short) 0x00CA:
-			if (in_received != ca1_fp.length)
+			if (in_received != FP_LENGTH)
 				ISOException.throwIt(SW_WRONG_LENGTH);
 
 			Util.arrayCopy(buffer, _0, ca1_fp, _0, in_received);
@@ -995,7 +1040,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// CB - Fingerprint Certification Authority 2
 		case (short) 0x00CB:
-			if (in_received != ca2_fp.length)
+			if (in_received != FP_LENGTH)
 				ISOException.throwIt(SW_WRONG_LENGTH);
 
 			Util.arrayCopy(buffer, _0, ca2_fp, _0, in_received);
@@ -1003,7 +1048,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// CC - Fingerprint Certification Authority 3
 		case (short) 0x00CC:
-			if (in_received != ca3_fp.length)
+			if (in_received != FP_LENGTH)
 				ISOException.throwIt(SW_WRONG_LENGTH);
 
 			Util.arrayCopy(buffer, _0, ca3_fp, _0, in_received);
