@@ -107,31 +107,34 @@ CAP file will be available in your Eclipse workspace as:
 Enable CCID mode on the NEO
 ---------------------------
 
-First make sure the YubiKey NEO is in the HID/CCID or CCID mode, using
-ykpers from the YubiKey Personalization tool:
+First make sure the YubiKey NEO is in the HID/CCID or CCID mode.  You
+may use the YubiKey NEO Manager GUI:
 
-  http://code.google.com/p/yubikey-personalization/
-  https://github.com/Yubico/yubikey-personalization
+  https://developers.yubico.com/yubikey-neo-manager/
 
-For example:
+If you prefer command line tools, you may use the 'ykpers' and
+'ykneomgr' tools depending on which mode the YubiKey NEO is in.  See
+the following projects:
 
-  sudo ykpersonalize -m82
+  https://developers.yubico.com/yubikey-personalization/
+  https://developers.yubico.com/libykneomgr/
 
-Eject and re-insert the NEO to restart it in the new USB mode.  You
-should then have a USB device like 1050:0111 or 1050:0112.  The
-1050:0110 device is HID only.
+Refer to the documentation of these projects on how to mode switch the
+YubiKey NEO.
 
 Installing CAP file to NEO
 --------------------------
 
-Then install the gpshell tool from Global Platform:
+Install the gpshell tool from Global Platform:
 
   http://sourceforge.net/projects/globalplatform/
 
-The projects that are needed is the GlobalPlatform Library 6.0.0,
-GPShell 1.4.4, and gppcscconnectionplugin 1.1.0.
+We have tested the combination of GlobalPlatform Library version
+6.0.0, GPShell version 1.4.4, and gppcscconnectionplugin version
+1.1.0.
 
-You need to whitelist the device in /etc/libccid_Info.plist.
+You need to whitelist the device in /etc/libccid_Info.plist which
+happens automatically if you have a recent libccid.
 
 WARNING!  When you load a new CAP file, everything on the device for
 that app is erased.  Keep a backup of your OpenPGP keys!
