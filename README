@@ -2,15 +2,14 @@ YubiKey NEO App: OpenPGP
 ========================
 
 This project implement the OpenPGP card functionality used on the
-YubiKey NEO device that is sold by Yubico.  This project is relatively
-unmodified from the upstream project on which this project is based:
+YubiKey NEO device that is sold by Yubico.
 
-  http://sourceforge.net/p/javacardopenpgp/
-  Author: Joeri de Ruiter
-
-The initial modifications we have made compared to the upstream
-project are minor, but we reserve the right to make other
-changes/improvements that are specific to the YubiKey NEO hardware.
+This project is based on the "Java Card OpenPGP Card" project made by
+Joeri de Ruiter.  The initial modifications we have made compared to
+the upstream project are minor, but we reserve the right to make other
+changes and improvements that are specific to the YubiKey NEO
+hardware.  For the original project homepage, see:
+http://sourceforge.net/p/javacardopenpgp/
 
 License
 -------
@@ -36,8 +35,7 @@ Installing JCKit
 ----------------
 
 Install the Java Card Development Kit version 2.2.2, download it from:
-
-  http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html#java_card_kit-2.2.2-oth-JPR
+http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html#java_card_kit-2.2.2-oth-JPR
 
 Unpack it into a new directory called for example "jckit" folder:
 
@@ -62,9 +60,7 @@ The cap file for loading on card will be at:
 Eclipe and eclipse-jcde
 -----------------------
 
-First install Eclipse following instructions on:
-
-  http://www.eclipse.org/
+First install Eclipse following instructions on: http://www.eclipse.org/
 
 On Debian/Ubuntu systems Eclipse is packaged and can be installed from
 the command line:
@@ -74,9 +70,8 @@ the command line:
 Start Eclipse once to make sure it creates a $HOME/.eclipse/
 directory.  Then quit Eclipse.
 
-Download the eclipse-jcde-0.2.zip file from
-
-  http://eclipse-jcde.sourceforge.net/
+Download the eclipse-jcde-0.2.zip file from:
+http://eclipse-jcde.sourceforge.net/
 
 and unpack it like this:
 
@@ -109,15 +104,12 @@ Enable CCID mode on the NEO
 
 First make sure the YubiKey NEO is in the HID/CCID or CCID mode.  You
 may use the YubiKey NEO Manager GUI:
-
-  https://developers.yubico.com/yubikey-neo-manager/
+https://developers.yubico.com/yubikey-neo-manager/
 
 If you prefer command line tools, you may use the 'ykpers' and
-'ykneomgr' tools depending on which mode the YubiKey NEO is in.  See
-the following projects:
-
-  https://developers.yubico.com/yubikey-personalization/
-  https://developers.yubico.com/libykneomgr/
+'ykneomgr' tools depending on which mode the YubiKey NEO is in.  See:
+https://developers.yubico.com/yubikey-personalization/
+https://developers.yubico.com/libykneomgr/
 
 Refer to the documentation of these projects on how to mode switch the
 YubiKey NEO.
@@ -126,8 +118,7 @@ Installing CAP file to NEO
 --------------------------
 
 Install the gpshell tool from Global Platform:
-
-  http://sourceforge.net/projects/globalplatform/
+http://sourceforge.net/projects/globalplatform/
 
 We have tested the combination of GlobalPlatform Library version
 6.0.0, GPShell version 1.4.4, and gppcscconnectionplugin version
