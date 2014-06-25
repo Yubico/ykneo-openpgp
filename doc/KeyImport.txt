@@ -1,15 +1,19 @@
-= Importing keys to ykneo-openpgp
+= Importing keys
 
 == Introduction
 
-This is a short description of how to setup the ykneo-openpgp applet with an
-already existing pgp key.
+This is a short description of how to import an already existing
+OpenPGP key to the YubiKey NEO running the ykneo-openpgp applet.
+
+For more information about GnuPG, see: http://www.gnupg.org/
+
+For more information about OpenPGP, see: http://www.openpgp.org/
 
 == Prerequisites
 
-For this procedure to work you must have GnuPG version 2.0.22 or later installed
-and the applet version must be 1.0.5 or later. To check the applet version you
-may run:
+For this procedure to work you must have GnuPG version 2.0.22 or later
+installed.  The ykneo-openpgp applet version must be 1.0.5 or later.
+To check the applet version you may run:
 
 ....
  $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye 
@@ -19,15 +23,15 @@ may run:
 
 Where "01 00 05" means version 1.0.5.
 
-If you have an existing key you want to import, that key must be a RSA 2048
-bit key.
+If you have an existing key you want to import, that key must be a RSA
+2048 bit key.
 
 == Generate a key
 
 Skip this step if you already have a key.
 
 ....
- $ gnupg --gen-key
+ $ gpg --gen-key
  
  gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
@@ -111,7 +115,7 @@ Take note of the id of the key, in this case 13AFCE85.
 Here we will add an authentication key to the previously generate key.
 
 ....
- $ gnugp --expert --edit-key 13AFCE85
+ $ gpg --expert --edit-key 13AFCE85
 
  gpg (GnuPG) 2.0.22; Copyright (C) 2013 Free Software Foundation, Inc.
  This is free software: you are free to change and redistribute it.
