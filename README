@@ -136,3 +136,10 @@ above, you may use the gpshell tool to load it:
   $ gpshell gpinstall.txt
 
 That's it!
+
+Tests
+-----
+
+To run the tests jcardsim is required. The jar can be fetched from
+https://github.com/licel/jcardsim/raw/jc2.2.2/jcardsim-2.2.2-all.jar
+and should be put into the test/lib directory.
