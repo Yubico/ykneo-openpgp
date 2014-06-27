@@ -5,3 +5,4 @@ License: GPL-2.0+
 Name: ykneo-openpgp
 Project: ykneo-openpgp
 Summary: OpenPGP app for the YubiKey NEO
+Travis: https://travis-ci.org/Yubico/ykneo-openpgp
