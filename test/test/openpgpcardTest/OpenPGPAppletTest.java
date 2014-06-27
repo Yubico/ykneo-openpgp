@@ -71,7 +71,23 @@ public class OpenPGPAppletTest {
 		simulator.transmitCommand(new byte[] {0, 0x44, 0, 0});
 
 		assertEquals(true, doVerify("123456", (byte) 0x81));
+	}
+	
+	@Test
+	public void testUnblock() {
+		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertEquals(false, doVerify("123456", (byte) 0x81));
 
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		byte[] res = simulator.transmitCommand(new byte[] {0, 0x2c, 0x02, (byte) 0x81, 0x06,
+				'6', '5', '4', '3', '2', '1'});
+		assertEquals(2, res.length);
+		assertEquals((byte)0x90, res[0]);
+		assertEquals(0, res[1]);
+				
+		assertEquals(true, doVerify("654321", (byte) 0x81));
 	}
 
 	private boolean doVerify(String pin, byte mode) {
