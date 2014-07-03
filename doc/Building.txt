@@ -1,0 +1,87 @@
+Building
+--------
+
+There are several ways to build the project:
+
+1) With ant, using JCKit.
+
+2) With Eclipse and eclipse-jcde, using JCKit.
+
+3) Using proprietary NXP Java Card tools.
+
+We usually suggest using Ant.
+
+Installing JCKit
+----------------
+
+Install the Java Card Development Kit version 2.2.2, download it from:
+http://www.oracle.com/technetwork/java/javasebusiness/downloads/java-archive-downloads-javame-419430.html#java_card_kit-2.2.2-oth-JPR
+
+Unpack it into a new directory called for example "jckit" folder:
+
+  $ mkdir jckit
+  $ cd jckit
+  $ unzip /path/to/java_card_kit-2_2_2-linux.zip
+  $ cd java_card_kit-2_2_2/
+  $ unzip java_card_kit-2_2_2-rr-bin-linux-do.zip
+
+Ant
+---
+
+The project can now be built by invoking ant, supplying the path to
+JCKit.  For example:
+
+  ant -DJAVACARD_HOME=/path/to/jckit/java_card_kit-2_2_2/
+
+The cap file for loading on card will be at:
+
+ ./applet/bin/openpgpcard/javacard/openpgpcard.cap
+
+Eclipe and eclipse-jcde
+-----------------------
+
+First install Eclipse following instructions on: http://www.eclipse.org/
+
+On Debian/Ubuntu systems Eclipse is packaged and can be installed from
+the command line:
+
+  apt-get install eclipse
+
+Start Eclipse once to make sure it creates a $HOME/.eclipse/
+directory.  Then quit Eclipse.
+
+Download the eclipse-jcde-0.2.zip file from:
+http://eclipse-jcde.sourceforge.net/
+
+and unpack it like this:
+
+  $ cd ~/.eclipse/*/
+  $ unzip /path/to/eclipse-jcde-0.2.zip
+
+The path to unpack the file into depends on your Eclipse installation,
+on my Debien Wheezy system the directory was called
+~/.eclipse/org.eclipse.platform_3.8_155965261/
+
+Start Eclipse again and confirm that you have a new top-level menu
+called "Java Card".  Then in Eclipse select the "Preferences" menu
+under "Java Card" and point the "Java Card Home" directory to
+/path/to/jckit/java_card_kit-2_2_2 replacing /path/to as appropriate.
+
+After that the project can be imported into the workspace.
+Right-click in the "Project Explorer" window and select "Import".
+Under "General" select "Existing Projects into Workspace".  As the
+root directory point the directory holding this file.  You need to
+select "Copy projects into workspace".
+
+To build the .cap file, expand and right click on the "openpgpcard"
+sub-directory and select "Java Card Tools" and then "Convert".  The
+CAP file will be available in your Eclipse workspace as:
+
+  ./applet/bin/openpgpcard/javacard/openpgpcard.cap
+
+Tests
+-----
+
+To run the tests jcardsim is required. The jar can be fetched from
+https://github.com/licel/jcardsim/raw/jc2.2.2/jcardsim-2.2.2-all.jar
+and should be put into the test/lib directory.
