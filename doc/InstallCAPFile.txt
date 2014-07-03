@@ -34,10 +34,10 @@ You need to whitelist the device in /etc/libccid_Info.plist which
 happens automatically if you have a recent libccid.
 
 WARNING!  When you load a new CAP file, everything on the device for
-that app is erased.  Keep a backup of your OpenPGP keys!
+that app is erased.  Keep a backup of your credentials.
 
-When the CAP file has been built and is available in the path shown
-above, you may use the gpshell tool to load it:
+When the CAP file has been built and is available in the default path,
+you may use the gpshell tool to load it:
 
   $ gpshell gpinstall.txt
 
