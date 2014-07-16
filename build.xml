@@ -34,7 +34,7 @@
       </classpath>
     </javac>
   </target>
-  <target depends="test" name="convert" description="convert to .cap" unless="test.build.mock">
+  <target depends="compile" name="convert" description="convert to .cap" unless="test.build.mock">
     <java classname="com.sun.javacard.converter.Converter" fork="true" failonerror="true">
       <arg line="-classdir ${build}"/>
       <arg line="-verbose"/>
