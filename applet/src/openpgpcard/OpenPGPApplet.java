@@ -56,7 +56,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 						 // PW1 Status byte changeable
 			0x00, // Secure messaging using 3DES
 			0x00, (byte) 0xFF, // Maximum length of challenges
-			0x00, (byte) 0xFF, // Maximum length Cardholder Certificate
+			0x04, (byte) 0xC0, // Maximum length Cardholder Certificate
 			0x00, (byte) 0xFF, // Maximum length command data
 			0x00, (byte) 0xFF  // Maximum length response data
 	};
@@ -65,13 +65,13 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static short RESPONSE_SM_MAX_LENGTH = 231;
 	private static short CHALLENGES_MAX_LENGTH = 255;
 
-	private static short BUFFER_MAX_LENGTH = 1020;
+	private static short BUFFER_MAX_LENGTH = 1221;
 
 	private static short LOGINDATA_MAX_LENGTH = 254;
 	private static short URL_MAX_LENGTH = 254;
 	private static short NAME_MAX_LENGTH = 39;
 	private static short LANG_MAX_LENGTH = 8;
-	private static short CERT_MAX_LENGTH = 500;
+	private static short CERT_MAX_LENGTH = 1216;
 	
 	private static short FP_LENGTH = 20;
 
@@ -185,7 +185,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		name_length = 0;
 		lang = new byte[LANG_MAX_LENGTH];
 		lang_length = 0;
-		cert = new byte[CERT_MAX_LENGTH];
+		cert = null;
 		cert_length = 0;
 		sex = 0x39;
 		
@@ -886,12 +886,13 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				buffer[offset++] = (byte) cert_length;
 			} else {
 				buffer[offset++] = (byte) 0x82;
-				Util.setShort(buffer, offset, cert_length);
-				offset += 2;
+				offset = Util.setShort(buffer, offset, cert_length);
 			}
 
-			offset = Util.arrayCopyNonAtomic(cert, _0, buffer, offset,
-					cert_length);
+			if(cert_length > 0) {
+				offset = Util.arrayCopyNonAtomic(cert, _0, buffer, offset,
+						cert_length);
+			}
 
 			return offset;
 
@@ -986,12 +987,13 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// 7F21 - Cardholder certificate
 		case (short) 0x7F21:
-			if (in_received > cert.length)
+			if (in_received > CERT_MAX_LENGTH)
 				ISOException.throwIt(SW_WRONG_LENGTH);
 
-			JCSystem.beginTransaction();
-			cert_length = Util.arrayCopy(buffer, _0, cert, _0, in_received);
-			JCSystem.commitTransaction();
+			if(cert == null) {
+				cert = new byte[CERT_MAX_LENGTH];
+			}
+			cert_length = Util.arrayCopyNonAtomic(buffer, _0, cert, _0, in_received);
 			break;
 
 		// C4 - PW Status Bytes
