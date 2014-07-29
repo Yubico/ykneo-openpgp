@@ -1331,6 +1331,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			max_length = RESPONSE_MAX_LENGTH;
 		}
 		
+		if(max_length > out_left) {
+			max_length = out_left;
+		}
+
 		Util.arrayCopyNonAtomic(buffer, out_sent, buf, _0, max_length);
 
 		short len = 0;
