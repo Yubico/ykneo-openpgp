@@ -2,25 +2,31 @@
 
 == Introduction
 
-This is a set of instructions that will allow you to reset your ykneo-openpgp applet.
+This is a set of instructions that will allow you to reset your
+ykneo-openpgp applet.
 
 == Prerequisites
 
-For this procedure, you must have GnuPG version 2.0.22 or later and ykneo-openpgp applet version 1.0.6 or later installed. To check the applet version run the following.
+For this procedure, you must have GnuPG version 2.0.22 or later and
+ykneo-openpgp applet version 1.0.6 or later installed.  To check the
+applet version run the following.
 
 ....
+ $ gpg2 --version
+ ...
  $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye 
  D[0000]  01 00 06 90 00                                     .....           
  OK
 ....
 
-"01 00 06" means version 1.0.6.
+The string "01 00 06" means version 1.0.6.
 
 == Reset the applet
 
 The reset procedure consists of two parts.
 
-First, the card is locked by entering the wrong PIN and Admin PIN multiple times.
+First, the card is locked by entering the wrong PIN and Admin PIN
+multiple times.
 
 ....
  C:\Users\Foo>gpg-connect-agent --hex
@@ -50,7 +56,9 @@ First, the card is locked by entering the wrong PIN and Admin PIN multiple times
  OK
 ....
 
-Then, the card is terminated and reactivated.
+Make sure the response goes down to C0, it is possible to have other
+retry counters than the default of 3.  Then, the card is terminated
+and reactivated as follows.
 
 ....
  > scd apdu 00 e6 00 00
@@ -61,9 +69,12 @@ Then, the card is terminated and reactivated.
  OK
 ....
 
-After this, close the connection, remove the card and reinsert it again. The applet should be reset.
+After this, close the connection, remove the card and reinsert it
+again. The applet should be reset.
 
-To make things easier you may want to create a script. To do so, put the following into a script file and run it using gpg-connect-agent (gpg-connect-agent -r FILE).
+To make things easier you may want to create a script. To do so, put
+the following into a script file and run it using gpg-connect-agent
+(gpg-connect-agent -r FILE).
 
 ....
  /hex
