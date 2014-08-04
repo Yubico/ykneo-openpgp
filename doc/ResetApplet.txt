@@ -1,0 +1,82 @@
+= Resetting applet
+
+== Introduction
+
+This is a set of instructions that will allow you to reset your ykneo-openpgp applet.
+
+== Prerequisites
+
+For this procedure, you must have GnuPG version 2.0.22 or later and ykneo-openpgp applet version 1.0.6 or later installed. To check the applet version run the following.
+
+....
+ $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye 
+ D[0000]  01 00 06 90 00                                     .....           
+ OK
+....
+
+"01 00 06" means version 1.0.6.
+
+== Reset the applet
+
+The reset procedure consists of two parts.
+
+First, the card is locked by entering the wrong PIN and Admin PIN multiple times.
+
+....
+ C:\Users\Foo>gpg-connect-agent --hex
+ > scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C2                                              c.
+ OK
+ > scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C1                                              c.
+ OK
+ > scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C0                                              c.
+ OK
+ > scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C0                                              c.
+ OK
+ > scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C2                                              c.
+ OK
+ > scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C1                                              c.
+ OK
+ > scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C0                                              c.
+ OK
+ scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ D[0000]  63 C0                                              c.
+ OK
+....
+
+Then, the card is terminated and reactivated.
+
+....
+ > scd apdu 00 e6 00 00
+ D[0000]  90 00                                              ..
+ OK
+ > scd apdu 00 44 00 00
+ D[0000]  90 00                                              ..
+ OK
+....
+
+After this, close the connection, remove the card and reinsert it again. The applet should be reset.
+
+To make things easier you may want to create a script. To do so, put the following into a script file and run it using gpg-connect-agent (gpg-connect-agent -r FILE).
+
+....
+ /hex
+ scd serialno
+ scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 81 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ scd apdu 00 20 00 83 08 40 40 40 40 40 40 40 40
+ scd apdu 00 e6 00 00
+ scd apdu 00 44 00 00
+ /echo Card has been successfully reset.
+....
