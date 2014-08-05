@@ -42,6 +42,25 @@ you may use the gpshell tool to load it:
   $ gpshell gpinstall.txt
 
 You can modify the gpinstall.txt file if you have other card manager
-keys.
+keys.  To set a proper OpenPGP card serial number you need to use the
+parameter -instAID so in gpinstall.txt replace this line:
+
+...
+install -file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
+...
+
+with the following after replacing xxxxxxxx with the serial number you
+want.  Note that YubiKey NEOs have decimal serial numbers.  You can
+convert that into hex and put it in the Application ID.  However,
+GnuPG will sometimes query you to insert "Card xxxxxxxx" and if you
+used xxxxxxxx as the hex representation of your decimal serial number,
+it may be difficult locating the right NEO (if you have multiple).
+Thus, we recommend to store the serial number in BCD code so if your
+YubiKey NEO has serial number 4711 you would use xxxxxxxx=00004711.
+
+...
+install -instAID -instAID D2760001240102000006xxxxxxxx0000 file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
+...
+
 
 That's it!
