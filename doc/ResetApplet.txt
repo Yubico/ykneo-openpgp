@@ -56,9 +56,10 @@ multiple times.
  OK
 ....
 
-Make sure the response goes down to C0, it is possible to have other
-retry counters than the default of 3.  Then, the card is terminated
-and reactivated as follows.
+Make sure the response goes down to C0, indicating zero remaining
+retries for that PIN.
+
+Then, the card is terminated and reactivated as follows.
 
 ....
  > scd apdu 00 e6 00 00
