@@ -20,6 +20,9 @@ package openpgpcardTest;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertArrayEquals;
+
+import java.util.Arrays;
+
 import javacard.framework.AID;
 import openpgpcard.OpenPGPApplet;
 
@@ -61,25 +64,37 @@ public class OpenPGPAppletTest {
 
 	@Test
 	public void testReset() {
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		assertArrayEquals(new byte[] {0, 3, 2}, getPinRetries());
 		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		assertArrayEquals(new byte[] {0, 3, 1}, getPinRetries());
 		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		assertArrayEquals(new byte[] {0, 3, 0}, getPinRetries());
 		assertEquals(false, doVerify("123456", (byte) 0x81));
 
 		simulator.transmitCommand(new byte[] {0, (byte) 0xe6, 0, 0});
 		simulator.transmitCommand(new byte[] {0, 0x44, 0, 0});
 
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 		assertEquals(true, doVerify("123456", (byte) 0x81));
 	}
 	
 	@Test
 	public void testUnblock() {
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("123456", (byte) 0x81));
 
 		assertEquals(true, doVerify("12345678", (byte) 0x83));
@@ -88,19 +103,24 @@ public class OpenPGPAppletTest {
 		assertArrayEquals(success,  res);
 				
 		assertEquals(true, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 	}
 	
 	@Test
 	public void testRcUnblock() {
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
 		byte[] newRc = {0, (byte) 0xda, 0, (byte) 0xd3, 8, '8', '7', '6', '5', '4', '3', '2', '1'};
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
 		assertArrayEquals(success, simulator.transmitCommand(newRc));
 		simulator.reset();
 		simulator.selectApplet(aid);
 		
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
 		assertEquals(false, doVerify("123456", (byte) 0x81));
 		
 		byte[] res = simulator.transmitCommand(new byte[] {0, 0x2c, 0, (byte) 0x81, 14,
@@ -108,6 +128,7 @@ public class OpenPGPAppletTest {
 				'6', '5', '4', '3', '2', '1'});
 		assertArrayEquals(success, res);
 		assertEquals(true, doVerify("654321", (byte) 0x81));
+		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 	}
 
 	private boolean doVerify(String pin, byte mode) {
@@ -125,6 +146,30 @@ public class OpenPGPAppletTest {
 		} else {
 			return false;
 		}
+	}
+	
+	private byte[] getPinRetries() {
+		byte[] result = new byte[3];
+		byte[] resp = simulator.transmitCommand(new byte[] {0, (byte) 0xca, 0, 0x6e});
+		byte[] code = Arrays.copyOfRange(resp, resp.length - 2, resp.length);
+		assertArrayEquals(success, code);
+		short offs = 4;
+		offs += resp[offs];
+		offs += 3;
+		offs += resp[offs];
+		offs += 4;
+		offs += resp[offs];
+		offs += 2;
+		offs += resp[offs];
+		offs += 2;
+		offs += resp[offs];
+		offs += 2;
+		offs += resp[offs];
+		offs += 7;
+		result[0] = resp[offs++];
+		result[1] = resp[offs++];
+		result[2] = resp[offs++];
+		return result;
 	}
 	
 	@SuppressWarnings("unused")
