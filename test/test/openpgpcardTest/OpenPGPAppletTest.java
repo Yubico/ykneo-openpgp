@@ -131,6 +131,16 @@ public class OpenPGPAppletTest {
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 	}
 
+	@Test
+	public void testSetPintries() {
+		byte[] resp = simulator.transmitCommand(new byte[] {0, (byte) 0xf2, 0, 0, 3, 5, 5, 5});
+		assertArrayEquals(new byte[] {0x69, (byte) 0x85}, resp);
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(new byte[] {0, (byte) 0xf2, 0, 0, 3, 5, 6, 7});
+		assertArrayEquals(success, resp);
+		assertArrayEquals(new byte[] {5, 6, 7}, getPinRetries());
+	}
+
 	private boolean doVerify(String pin, byte mode) {
 		byte[] command = new byte[5 + pin.length()];
 		command[1] = 0x20;

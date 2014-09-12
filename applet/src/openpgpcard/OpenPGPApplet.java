@@ -357,6 +357,15 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			case (byte) 0xF1:
 				le = Util.arrayCopy(VERSION, _0, buffer, _0, (short) VERSION.length);
 				break;
+
+			// SET RETRIES (vendor specific)
+			case (byte) 0xF2:
+				if(lc != 3) {
+					ISOException.throwIt(ISO7816.SW_WRONG_DATA);
+				}
+				short offs = ISO7816.OFFSET_CDATA;
+				setPinRetries(buf[offs++], buf[offs++], buf[offs++]);
+				break;
 	
 			default:
 				// good practice: If you don't know the INStruction, say so:
@@ -381,6 +390,28 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				}
 			}
 		}
+	}
+
+	private void setPinRetries(byte pin_retries, byte reset_retries, byte admin_retries) {
+		if(!pw3.isValidated()) {
+			ISOException.throwIt(ISO7816.SW_CONDITIONS_NOT_SATISFIED);
+		}
+		if(pin_retries != 0) {
+			pw1 = new OwnerPIN(pin_retries, PW1_MAX_LENGTH);
+			pw1.update(PW1_DEFAULT, _0, (byte) PW1_DEFAULT.length);
+			pw1_length = (byte) PW1_DEFAULT.length;
+			pw1_status = 0x00;
+		}
+		if(reset_retries != 0) {
+			rc = new OwnerPIN(reset_retries, RC_MAX_LENGTH);
+			rc_length = 0;
+		}
+		if(admin_retries != 0) {
+			pw3 = new OwnerPIN(admin_retries, PW3_MAX_LENGTH);
+			pw3.update(PW3_DEFAULT, _0, (byte) PW3_DEFAULT.length);
+			pw3_length = (byte) PW3_DEFAULT.length;
+		}
+		JCSystem.requestObjectDeletion();
 	}
 
 	/**
