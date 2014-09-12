@@ -548,32 +548,33 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	 *            Mode used to reset PW1
 	 */
 	private void resetRetryCounter(APDU apdu, byte mode) {
+		short new_length = 0;
+		short offs = 0;
 		if (mode == (byte) 0x00) {
 			// Authentication using RC
 			if (rc_length == 0)
 				ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-			short new_length = (short) (in_received - rc_length);
-			if (new_length < PW1_MIN_LENGTH || new_length > PW1_MAX_LENGTH)
-				ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
-
+			new_length = (short) (in_received - rc_length);
+			offs = rc_length;
 			if (!rc.check(buffer, _0, rc_length))
 				ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 		} else if (mode == (byte) 0x02) {
 			// Authentication using PW3
 			if (!pw3.isValidated())
 				ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
-
-			if (in_received < PW1_MIN_LENGTH || in_received > PW1_MAX_LENGTH)
-				ISOException.throwIt(SW_WRONG_LENGTH);
+			new_length = in_received;
 		} else {
 			ISOException.throwIt(SW_WRONG_P1P2);
 		}
 
+		if (new_length < PW1_MIN_LENGTH || new_length > PW1_MAX_LENGTH)
+			ISOException.throwIt(SW_WRONG_LENGTH);
+
 		// Change PW1
 		JCSystem.beginTransaction();
-		pw1.update(buffer, _0, (byte) in_received);
-		pw1_length = (byte) in_received;
+		pw1.update(buffer, offs, (byte) new_length);
+		pw1_length = (byte) new_length;
 		pw1.resetAndUnblock();
 		JCSystem.commitTransaction();
 	}
