@@ -95,6 +95,9 @@ public class OpenPGPAppletTest {
 		assertEquals(true, doVerify("12345678", (byte) 0x83));
 		byte[] newRc = {0, (byte) 0xda, 0, (byte) 0xd3, 8, '8', '7', '6', '5', '4', '3', '2', '1'};
 		assertArrayEquals(success, simulator.transmitCommand(newRc));
+		simulator.reset();
+		simulator.selectApplet(aid);
+		
 		assertEquals(false, doVerify("654321", (byte) 0x81));
 		assertEquals(false, doVerify("654321", (byte) 0x81));
 		assertEquals(false, doVerify("654321", (byte) 0x81));
