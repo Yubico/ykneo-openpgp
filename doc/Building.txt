@@ -25,6 +25,16 @@ Unpack it into a new directory called for example "jckit" folder:
   $ cd java_card_kit-2_2_2/
   $ unzip java_card_kit-2_2_2-rr-bin-linux-do.zip
 
+Installing JCardSim
+-------------------
+
+This is needed for 'ant test' to work.
+
+curl -L https://github.com/licel/jcardsim/raw/jc2.2.2/jcardsim-2.2.2-all.jar -o test/lib/jcardsim-2.2.2-all.jar
+
+The SHA256 checksum on the file we have successfully used is:
+33c167e9bf989c3fca692f8053b8032280a1cbca79df818e131c486dd174746a
+
 Ant
 ---
 
