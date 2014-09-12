@@ -19,6 +19,7 @@ package openpgpcardTest;
 */
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertArrayEquals;
 import javacard.framework.AID;
 import openpgpcard.OpenPGPApplet;
 
@@ -32,6 +33,7 @@ public class OpenPGPAppletTest {
 	static final byte[] pgpAid = new byte[] {(byte) 0xd2, 0x76, 0x00, 0x01, 0x24,
 		0x01, 0x02, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00};
 	static final AID aid = new AID(pgpAid, (short)0, (byte)pgpAid.length);
+	static final byte[] success = {(byte) 0x90, 0x00};
 	
 	@Before
 	public void setup() {
@@ -83,9 +85,7 @@ public class OpenPGPAppletTest {
 		assertEquals(true, doVerify("12345678", (byte) 0x83));
 		byte[] res = simulator.transmitCommand(new byte[] {0, 0x2c, 0x02, (byte) 0x81, 0x06,
 				'6', '5', '4', '3', '2', '1'});
-		assertEquals(2, res.length);
-		assertEquals((byte)0x90, res[0]);
-		assertEquals(0, res[1]);
+		assertArrayEquals(success,  res);
 				
 		assertEquals(true, doVerify("654321", (byte) 0x81));
 	}
