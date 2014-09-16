@@ -1,5 +1,13 @@
 ykneo-openpgp NEWS -- History of changes.
 
+* Version 1.0.7 (unreleased)
+
+** Fix so reset retry counter with reset code can work
+
+** Add a new vendor instruction for changing the number of pin retries.
+
+** Increase storage for certificate, and only allocate it on demand.
+
 * Version 1.0.6 (released 2014-07-16)
 
 ** Support TERMINATE DF and ACTIVATE FILE.
