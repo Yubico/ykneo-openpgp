@@ -1,6 +1,6 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.7 (unreleased)
+* Version 1.0.7 (released 2014-09-16)
 
 ** Fix so reset retry counter with reset code can work
 
