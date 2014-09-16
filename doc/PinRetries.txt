@@ -1,0 +1,36 @@
+= Setting number of PIN retries
+
+== Introduction
+
+This is an instruction for changing the number of retries possible for a PIN code
+with the ykneo-openpgp applet.
+
+== Prerequisites
+
+For this procedure, you must have ykneo-openpgp applet version 1.0.7 or later
+installed.  To check the applet version run the following.
+
+....
+ $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye
+ D[0000]  01 00 07 90 00                                     .....
+ OK
+....
+
+The string "01 00 07" means version 1.0.7.
+
+== Setting the PIN retries
+
+When the retry counter is changed the all PIN codes will be reset to default
+(123456 for user PIN and 12345678 for admin PIN).
+
+For the command to be available the admin PIN must first be validated.
+
+The command consists of the instruction (f2) and three values as data, those are in
+order: retries for user PIN, retries for reset code and retries for admin PIN.
+
+In this example the admin PIN is first validated, then all three values are set to
+5 retries:
+....
+ $ gpg-connect-agent --hex "scd apdu 00 20 00 83 08 31 32 33 34 35 36 37 38" \
+   "scd apdu scd apdu 00 f2 00 00 03 05 05 05"
+....
