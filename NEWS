@@ -1,6 +1,10 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.8 (unreleased)
+* Version 1.0.9 (unreleased)
+
+* Version 1.0.8 (released 2014-09-26)
+
+** Fix a bug where ACTIVATE FILE didn't work.
 
 * Version 1.0.7 (released 2014-09-16)
 
