@@ -175,7 +175,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		auth_key = new PGPKey();
 
 		// Initialize Secure Messaging
-		sm = new OpenPGPSecureMessaging();
+		sm.init();
 		
 		loginData = new byte[LOGINDATA_MAX_LENGTH];
 		loginData_length = 0;
@@ -208,6 +208,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 		
+		sm = new OpenPGPSecureMessaging();
+
 		initialize();
 	}
 
