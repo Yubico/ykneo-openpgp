@@ -67,7 +67,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static short RESPONSE_SM_MAX_LENGTH = 231;
 	private static short CHALLENGES_MAX_LENGTH = 255;
 
-	private static short BUFFER_MAX_LENGTH = 1221;
+	private static short BUFFER_MAX_LENGTH = 1024;
 
 	private static short LOGINDATA_MAX_LENGTH = 254;
 	private static short URL_MAX_LENGTH = 254;
