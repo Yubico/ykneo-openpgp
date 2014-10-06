@@ -88,6 +88,9 @@ public class OpenPGPSecureMessaging {
                 JCSystem.CLEAR_ON_DESELECT);
         tmp = JCSystem.makeTransientByteArray(TMP_SIZE, 
                 JCSystem.CLEAR_ON_DESELECT);
+        ssc_set = JCSystem.makeTransientBooleanArray((short)1,
+                JCSystem.CLEAR_ON_DESELECT);
+
         signer = Signature.getInstance(
                 Signature.ALG_DES_MAC8_ISO9797_1_M2_ALG3, false);
         verifier = Signature.getInstance(
@@ -104,8 +107,15 @@ public class OpenPGPSecureMessaging {
                 KeyBuilder.TYPE_DES_TRANSIENT_DESELECT, 
                 KeyBuilder.LENGTH_DES3_2KEY, false);
         
-        ssc_set = JCSystem.makeTransientBooleanArray((short)1, JCSystem.CLEAR_ON_DESELECT);
+        init();
+    }
+
+    public void init() {
         ssc_set[0] = false;
+        Util.arrayFillNonAtomic(ssc, (short)0, SSC_SIZE, (byte) 0);
+        Util.arrayFillNonAtomic(tmp, (short)0, TMP_SIZE, (byte) 0);
+        
+        clearSessionKeys();
     }
 
     /**

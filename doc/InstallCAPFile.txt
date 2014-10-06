@@ -1,0 +1,66 @@
+Installing CAP file on YubiKey NEO
+----------------------------------
+
+After building the CAP file you can install it on a NEO.  You need to
+have a NEO with default card manager keys, or know the card manager
+keys.
+
+Enable CCID mode on the NEO
+---------------------------
+
+First make sure the YubiKey NEO is in the HID/CCID or CCID mode.  You
+may use the YubiKey NEO Manager GUI:
+https://developers.yubico.com/yubikey-neo-manager/
+
+If you prefer command line tools, you may use the 'ykpers' and
+'ykneomgr' tools depending on which mode the YubiKey NEO is in.  See:
+https://developers.yubico.com/yubikey-personalization/
+https://developers.yubico.com/libykneomgr/
+
+Refer to the documentation of these projects on how to mode switch the
+YubiKey NEO.
+
+Installing CAP file to NEO
+--------------------------
+
+Install the gpshell tool from Global Platform:
+http://sourceforge.net/projects/globalplatform/
+
+We have tested the combination of GlobalPlatform Library version
+6.0.0, GPShell version 1.4.4, and gppcscconnectionplugin version
+1.1.0.
+
+You need to whitelist the device in /etc/libccid_Info.plist which
+happens automatically if you have a recent libccid.
+
+WARNING!  When you load a new CAP file, everything on the device for
+that app is erased.  Keep a backup of your credentials.
+
+When the CAP file has been built and is available in the default path,
+you may use the gpshell tool to load it:
+
+  $ gpshell gpinstall.txt
+
+You can modify the gpinstall.txt file if you have other card manager
+keys.  To set a proper OpenPGP card serial number you need to use the
+parameter -instAID so in gpinstall.txt replace this line:
+
+...
+install -file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
+...
+
+with the following after replacing xxxxxxxx with the serial number you
+want.  Note that YubiKey NEOs have decimal serial numbers.  You can
+convert that into hex and put it in the Application ID.  However,
+GnuPG will sometimes query you to insert "Card xxxxxxxx" and if you
+used xxxxxxxx as the hex representation of your decimal serial number,
+it may be difficult locating the right NEO (if you have multiple).
+Thus, we recommend to store the serial number in BCD code so if your
+YubiKey NEO has serial number 4711 you would use xxxxxxxx=00004711.
+
+...
+install -instAID -instAID D2760001240102000006xxxxxxxx0000 file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
+...
+
+
+That's it!

@@ -12,3 +12,4 @@ ykneo-openpgp-*.tar.gz
 ykneo-openpgp-*.tar.gz.sig
 test/.classpath
 test/.project
+test/lib/jcardsim-2.2.2-all.jar

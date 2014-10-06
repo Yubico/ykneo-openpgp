@@ -4,8 +4,8 @@
   <property name="src" location="applet/src"/>
   <property name="build" location="applet/bin"/>
   <property name="test.src" location="test/test"/>
-  <property name="test.mock" location="test/mock"/>
   <property name="test.build" location="test/bin"/>
+  <property name="test.lib" location="test/lib"/>
   <!-- Load user specified extra properties -->
   <property file="${user.home}/javacard.properties"/>
   <property name="JAVA_PACKAGE" value="openpgpcard"/>
@@ -18,14 +18,23 @@
     <mkdir dir="${build}"/>
     <mkdir dir="${test.build}/output"/>
   </target>
-  <target name="compile" depends="init" description="compile the source ">
+  <target name="compile" depends="init" description="compile the source" unless="test.build.mock">
     <javac srcdir="${src}" destdir="${build}" includeantruntime="false" source="1.5" target="1.5">
       <classpath>
         <pathelement path="${JAVACARD_HOME}/lib/api.jar"/>
       </classpath>
     </javac>
   </target>
-  <target depends="compile" name="convert" description="convert to .cap">
+  <target name="compileMock" depends="init" description="compile with mocked javacard" if="test.build.mock">
+    <javac srcdir="${src}" destdir="${build}" source="1.2" target="1.1" includeantruntime="false">
+      <classpath>
+        <fileset dir="${test.lib}">
+          <include name="*.jar"/>
+        </fileset>
+      </classpath>
+    </javac>
+  </target>
+  <target depends="compile" name="convert" description="convert to .cap" unless="test.build.mock">
     <java classname="com.sun.javacard.converter.Converter" fork="true" failonerror="true">
       <arg line="-classdir ${build}"/>
       <arg line="-verbose"/>
@@ -43,12 +52,14 @@
     <delete dir="${build}"/>
     <delete dir="${test.build}"/>
   </target>
-  <target name="compileTest" depends="compile">
-    <javac srcdir="${test.mock}" destdir="${test.build}" includeantruntime="false" />
+  <target name="compileTest" depends="compile,compileMock">
     <javac srcdir="${test.src}" destdir="${test.build}" includeantruntime="false">
       <classpath>
         <pathelement path="${build}"/>
         <pathelement location="/usr/share/java/junit4.jar"/>
+        <fileset dir="${test.lib}">
+          <include name="*.jar"/>
+        </fileset>
       </classpath>
     </javac>
   </target>
@@ -58,6 +69,9 @@
         <pathelement location="${test.build}"/>
         <pathelement path="${build}"/>
         <pathelement location="/usr/share/java/junit4.jar"/>
+        <fileset dir="${test.lib}">
+          <include name="*.jar"/>
+        </fileset>
       </classpath>
       <formatter type="plain" usefile="false" />
       <formatter type="plain" />
