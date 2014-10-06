@@ -21,7 +21,10 @@
   <target name="compile" depends="init" description="compile the source" unless="test.build.mock">
     <javac srcdir="${src}" destdir="${build}" includeantruntime="false" source="1.5" target="1.5">
       <classpath>
-        <pathelement path="${JAVACARD_HOME}/lib/api.jar"/>
+        <fileset dir="${JAVACARD_HOME}/lib/">
+          <include name="*.jar"/>
+        </fileset>
+        <pathelement path="${JCOPX_HOME}/api-jcopx-2.4.2_R1-7.0.1.jar"/>
       </classpath>
     </javac>
   </target>
@@ -38,7 +41,7 @@
     <java classname="com.sun.javacard.converter.Converter" fork="true" failonerror="true">
       <arg line="-classdir ${build}"/>
       <arg line="-verbose"/>
-      <arg line="-exportpath ${JAVACARD_HOME}/api_export_files"/>
+      <arg line="-exportpath ${JAVACARD_HOME}/api_export_files:${JCOPX_HOME}/export"/>
       <arg line="-out CAP JCA EXP"/>
       <arg line="-applet ${APPLET_AID} ${APPLET_NAME}"/>
       <arg line="${JAVA_PACKAGE} ${PACKAGE_AID} ${VERSION}"/>
