@@ -830,7 +830,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			// 73 - Discretionary data objects
 			buffer[offset++] = 0x73;
-			buffer[offset++] = 0x00;
+			buffer[offset++] = (byte)0x81; // This field's length will exceed 127 bytes
+			short ddoLengthOffset = offset;
+			buffer[offset++] = 0x00; // Placeholder for length byte
 
 			// C0 - Extended capabilities
 			buffer[offset++] = (byte) 0xC0;
@@ -887,6 +889,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			offset = sig_key.getTime(buffer, offset);
 			offset = dec_key.getTime(buffer, offset);
 			offset = auth_key.getTime(buffer, offset);
+
+			// Set length of combined discretionary data objects
+			buffer[ddoLengthOffset] = (byte) (offset - ddoLengthOffset - 1);
 
 			// Set length of combined data
 			buffer[2] = (byte) (offset - 3);
