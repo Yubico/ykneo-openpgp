@@ -158,7 +158,7 @@ public class OpenPGPAppletTest {
 
 		simulator.reset();
 		simulator.selectApplet(aid);
-		byte[] expect = {0x7f, 0x21, 8, 1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0};
+		byte[] expect = {1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0};
 		resp = simulator.transmitCommand(new byte[] {0, (byte) 0xca, 0x7f, 0x21});
 		assertArrayEquals(expect, resp);
 	}
@@ -259,7 +259,7 @@ public class OpenPGPAppletTest {
 		byte[] resp = simulator.transmitCommand(new byte[] {0, (byte) 0xca, 0, 0x6e});
 		byte[] code = Arrays.copyOfRange(resp, resp.length - 2, resp.length);
 		assertArrayEquals(success, code);
-		short offs = 4;
+		short offs = 1;
 		offs += resp[offs];
 		offs += 3;
 		offs += resp[offs];
