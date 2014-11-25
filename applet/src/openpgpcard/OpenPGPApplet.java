@@ -84,6 +84,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	private static final byte RC_MIN_LENGTH = 8;
 	private static final byte RC_MAX_LENGTH = 127;
+	private static final byte[] RC_DEFAULT = { 0x00 };
 
 	private static final byte PW3_MIN_LENGTH = 8;
 	private static final byte PW3_MAX_LENGTH = 127;
@@ -153,45 +154,43 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	private void initialize() {
 		// Initialize PW1 with default password
-		pw1 = new OwnerPIN((byte) 3, PW1_MAX_LENGTH);
 		pw1.update(PW1_DEFAULT, _0, (byte) PW1_DEFAULT.length);
 		pw1_length = (byte) PW1_DEFAULT.length;
 		pw1_status = 0x00;
 
 		// Initialize RC
-		rc = new OwnerPIN((byte) 3, RC_MAX_LENGTH);
+		rc.update(RC_DEFAULT, _0, (byte) RC_DEFAULT.length);
 		rc_length = 0;
 
 		// Initialize PW3 with default password
-		pw3 = new OwnerPIN((byte) 3, PW3_MAX_LENGTH);
 		pw3.update(PW3_DEFAULT, _0, (byte) PW3_DEFAULT.length);
 		pw3_length = (byte) PW3_DEFAULT.length;
 
-		// Create empty keys
-		sig_key = new PGPKey();
-		dec_key = new PGPKey();
-		auth_key = new PGPKey();
+		// Clear key data
+		sig_key.initialize();
+		dec_key.initialize();
+		auth_key.initialize();
 
 		// Initialize Secure Messaging
 		sm.init();
-		
-		loginData = new byte[LOGINDATA_MAX_LENGTH];
+
 		loginData_length = 0;
-		url = new byte[URL_MAX_LENGTH];
+		Util.arrayFillNonAtomic(loginData, (short)0, (short)loginData.length, (byte)0);
 		url_length = 0;
-		name = new byte[NAME_MAX_LENGTH];
+		Util.arrayFillNonAtomic(url, (short)0, (short)url.length, (byte)0);
 		name_length = 0;
-		lang = new byte[LANG_MAX_LENGTH];
+		Util.arrayFillNonAtomic(name, (short)0, (short)name.length, (byte)0);
 		lang_length = 0;
+		Util.arrayFillNonAtomic(lang, (short)0, (short)lang.length, (byte)0);
 		cert = null;
 		cert_length = 0;
 		sex = 0x39;
-		
-		ds_counter = new byte[3];
-		
-		ca1_fp = new byte[FP_LENGTH];
-		ca2_fp = new byte[FP_LENGTH];
-		ca3_fp = new byte[FP_LENGTH];
+
+		Util.arrayFillNonAtomic(ds_counter, (short)0, (short)3, (byte)0);
+
+		Util.arrayFillNonAtomic(ca1_fp, (short)0, (short)ca1_fp.length, (byte)0);
+		Util.arrayFillNonAtomic(ca2_fp, (short)0, (short)ca2_fp.length, (byte)0);
+		Util.arrayFillNonAtomic(ca3_fp, (short)0, (short)ca3_fp.length, (byte)0);
 	}
 
 	public OpenPGPApplet() {
@@ -203,8 +202,29 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
-		
+
 		sm = new OpenPGPSecureMessaging();
+
+		// Create PIN objects (will be initialized in initialize method)
+		pw1 = new OwnerPIN((byte) 3, PW1_MAX_LENGTH);
+		rc = new OwnerPIN((byte) 3, RC_MAX_LENGTH);
+		pw3 = new OwnerPIN((byte) 3, PW3_MAX_LENGTH);
+
+		// Create empty keys
+		sig_key = new PGPKey();
+		dec_key = new PGPKey();
+		auth_key = new PGPKey();
+
+		loginData = new byte[LOGINDATA_MAX_LENGTH];
+		url = new byte[URL_MAX_LENGTH];
+		name = new byte[NAME_MAX_LENGTH];
+		lang = new byte[LANG_MAX_LENGTH];
+
+		ds_counter = new byte[3];
+
+		ca1_fp = new byte[FP_LENGTH];
+		ca2_fp = new byte[FP_LENGTH];
+		ca3_fp = new byte[FP_LENGTH];
 
 		initialize();
 	}
