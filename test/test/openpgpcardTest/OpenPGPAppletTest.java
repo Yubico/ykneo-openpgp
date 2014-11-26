@@ -183,7 +183,7 @@ public class OpenPGPAppletTest {
 		offs += resp[offs];
 		offs += 3;
 		offs += resp[offs];
-		offs += 4;
+		offs += 5;
 		offs += resp[offs];
 		offs += 2;
 		offs += resp[offs];

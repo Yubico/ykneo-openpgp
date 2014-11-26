@@ -42,6 +42,18 @@ public class PGPKey implements ISO7816 {
 		key = new KeyPair(KeyPair.ALG_RSA_CRT, KEY_SIZE);
 
 		fp = new byte[FP_SIZE];
+
+		initialize();
+	}
+
+	public void initialize() {
+		if(key.getPrivate() != null) {
+			key.getPrivate().clearKey();
+		}
+		if(key.getPublic() != null) {
+			key.getPublic().clearKey();
+		}
+
 		Util.arrayFillNonAtomic(fp, (short) 0, (short) fp.length, (byte) 0);
 
 		Util.setShort(attributes, (short) 1, KEY_SIZE);

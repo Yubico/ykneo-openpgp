@@ -84,6 +84,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	private static final byte RC_MIN_LENGTH = 8;
 	private static final byte RC_MAX_LENGTH = 127;
+	private static final byte[] RC_DEFAULT = { 0x00 };
 
 	private static final byte PW3_MIN_LENGTH = 8;
 	private static final byte PW3_MAX_LENGTH = 127;
@@ -132,8 +133,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private Cipher cipher;
 	private RandomData random;
 
-	private byte[] tmp;
-
 	private byte[] buffer;
 	private short out_left = 0;
 	private short out_sent = 0;
@@ -155,51 +154,47 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	private void initialize() {
 		// Initialize PW1 with default password
-		pw1 = new OwnerPIN((byte) 3, PW1_MAX_LENGTH);
 		pw1.update(PW1_DEFAULT, _0, (byte) PW1_DEFAULT.length);
 		pw1_length = (byte) PW1_DEFAULT.length;
 		pw1_status = 0x00;
 
 		// Initialize RC
-		rc = new OwnerPIN((byte) 3, RC_MAX_LENGTH);
+		rc.update(RC_DEFAULT, _0, (byte) RC_DEFAULT.length);
 		rc_length = 0;
 
 		// Initialize PW3 with default password
-		pw3 = new OwnerPIN((byte) 3, PW3_MAX_LENGTH);
 		pw3.update(PW3_DEFAULT, _0, (byte) PW3_DEFAULT.length);
 		pw3_length = (byte) PW3_DEFAULT.length;
 
-		// Create empty keys
-		sig_key = new PGPKey();
-		dec_key = new PGPKey();
-		auth_key = new PGPKey();
+		// Clear key data
+		sig_key.initialize();
+		dec_key.initialize();
+		auth_key.initialize();
 
 		// Initialize Secure Messaging
 		sm.init();
-		
-		loginData = new byte[LOGINDATA_MAX_LENGTH];
+
 		loginData_length = 0;
-		url = new byte[URL_MAX_LENGTH];
+		Util.arrayFillNonAtomic(loginData, (short)0, (short)loginData.length, (byte)0);
 		url_length = 0;
-		name = new byte[NAME_MAX_LENGTH];
+		Util.arrayFillNonAtomic(url, (short)0, (short)url.length, (byte)0);
 		name_length = 0;
-		lang = new byte[LANG_MAX_LENGTH];
+		Util.arrayFillNonAtomic(name, (short)0, (short)name.length, (byte)0);
 		lang_length = 0;
+		Util.arrayFillNonAtomic(lang, (short)0, (short)lang.length, (byte)0);
 		cert = null;
 		cert_length = 0;
 		sex = 0x39;
-		
-		ds_counter = new byte[3];
-		
-		ca1_fp = new byte[FP_LENGTH];
-		ca2_fp = new byte[FP_LENGTH];
-		ca3_fp = new byte[FP_LENGTH];
+
+		Util.arrayFillNonAtomic(ds_counter, (short)0, (short)3, (byte)0);
+
+		Util.arrayFillNonAtomic(ca1_fp, (short)0, (short)ca1_fp.length, (byte)0);
+		Util.arrayFillNonAtomic(ca2_fp, (short)0, (short)ca2_fp.length, (byte)0);
+		Util.arrayFillNonAtomic(ca3_fp, (short)0, (short)ca3_fp.length, (byte)0);
 	}
 
 	public OpenPGPApplet() {
-		// Create temporary arrays
-		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
+		// Create temporary array
 		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
 				JCSystem.CLEAR_ON_DESELECT);
 		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
@@ -207,8 +202,29 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
 		random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
-		
+
 		sm = new OpenPGPSecureMessaging();
+
+		// Create PIN objects (will be initialized in initialize method)
+		pw1 = new OwnerPIN((byte) 3, PW1_MAX_LENGTH);
+		rc = new OwnerPIN((byte) 3, RC_MAX_LENGTH);
+		pw3 = new OwnerPIN((byte) 3, PW3_MAX_LENGTH);
+
+		// Create empty keys
+		sig_key = new PGPKey();
+		dec_key = new PGPKey();
+		auth_key = new PGPKey();
+
+		loginData = new byte[LOGINDATA_MAX_LENGTH];
+		url = new byte[URL_MAX_LENGTH];
+		name = new byte[NAME_MAX_LENGTH];
+		lang = new byte[LANG_MAX_LENGTH];
+
+		ds_counter = new byte[3];
+
+		ca1_fp = new byte[FP_LENGTH];
+		ca2_fp = new byte[FP_LENGTH];
+		ca3_fp = new byte[FP_LENGTH];
 
 		initialize();
 	}
@@ -634,14 +650,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!sig_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be signed to tmp
-		short length = Util
-				.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
 		cipher.init(sig_key.getPrivate(), Cipher.MODE_ENCRYPT);
 		increaseDSCounter();
 
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		return cipher.doFinal(buffer, _0, in_received, buffer, _0);
 	}
 
 	/**
@@ -661,13 +673,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!dec_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be decrypted to tmp, omit padding indicator
-		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
-				(short) (in_received - 1));
-
 		cipher.init(dec_key.getPrivate(), Cipher.MODE_DECRYPT);
 
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		return cipher.doFinal(buffer, (short)1, (short) (in_received - 1), buffer, _0);
 	}
 
 	/**
@@ -682,13 +690,12 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short internalAuthenticate(APDU apdu) {
 		if (!pw1.isValidated() && pw1_modes[PW1_MODE_NO82])
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
-		Util.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
 
 		if (!auth_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
 		cipher.init(auth_key.getPrivate(), Cipher.MODE_ENCRYPT);
-		return cipher.doFinal(tmp, _0, in_received, buffer, _0);
+		return cipher.doFinal(buffer, _0, in_received, buffer, _0);
 	}
 
 	/**
@@ -830,7 +837,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			// 73 - Discretionary data objects
 			buffer[offset++] = 0x73;
-			buffer[offset++] = 0x00;
+			buffer[offset++] = (byte)0x81; // This field's length will exceed 127 bytes
+			short ddoLengthOffset = offset;
+			buffer[offset++] = 0x00; // Placeholder for length byte
 
 			// C0 - Extended capabilities
 			buffer[offset++] = (byte) 0xC0;
@@ -887,6 +896,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			offset = sig_key.getTime(buffer, offset);
 			offset = dec_key.getTime(buffer, offset);
 			offset = auth_key.getTime(buffer, offset);
+
+			// Set length of combined discretionary data objects
+			buffer[ddoLengthOffset] = (byte) (offset - ddoLengthOffset - 1);
 
 			// Set length of combined data
 			buffer[2] = (byte) (offset - 3);
@@ -1268,45 +1280,36 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short sendPublicKey(PGPKey key) {
 		RSAPublicKey pubkey = key.getPublic();
 
-		// Build message in tmp
+		// Build message in buffer
 		short offset = 0;
-
-		// 81 - Modulus
-		tmp[offset++] = (byte) 0x81;
-
-		// Length of modulus is always greater than 128 bytes
-		if (key.getModulusLength() < 256) {
-			tmp[offset++] = (byte) 0x81;
-			tmp[offset++] = (byte) key.getModulusLength();
-		} else {
-			tmp[offset++] = (byte) 0x82;
-			offset = Util.setShort(tmp, offset, key.getModulusLength());
-		}
-		pubkey.getModulus(tmp, offset);
-		offset += key.getModulusLength();
-
-		// 82 - Exponent
-		tmp[offset++] = (byte) 0x82;
-		tmp[offset++] = (byte) key.getExponentLength();
-		pubkey.getExponent(tmp, offset);
-		offset += key.getExponentLength();
-
-		short len = offset;
-
-		offset = 0;
 
 		buffer[offset++] = 0x7F;
 		buffer[offset++] = 0x49;
+		buffer[offset++] = (byte) 0x82;
+		short offsetForLength = offset;
+		offset += 2;
 
-		if (len < 256) {
+		// 81 - Modulus
+		buffer[offset++] = (byte) 0x81;
+
+		// Length of modulus is always greater than 128 bytes
+		if (key.getModulusLength() < 256) {
 			buffer[offset++] = (byte) 0x81;
-			buffer[offset++] = (byte) len;
+			buffer[offset++] = (byte) key.getModulusLength();
 		} else {
 			buffer[offset++] = (byte) 0x82;
-			offset = Util.setShort(buffer, offset, len);
+			offset = Util.setShort(buffer, offset, key.getModulusLength());
 		}
+		pubkey.getModulus(buffer, offset);
+		offset += key.getModulusLength();
 
-		offset = Util.arrayCopyNonAtomic(tmp, _0, buffer, offset, len);
+		// 82 - Exponent
+		buffer[offset++] = (byte) 0x82;
+		buffer[offset++] = (byte) key.getExponentLength();
+		pubkey.getExponent(buffer, offset);
+		offset += key.getExponentLength();
+
+		Util.setShort(buffer, offsetForLength, (short)(offset - offsetForLength - 2));
 
 		return offset;
 	}
