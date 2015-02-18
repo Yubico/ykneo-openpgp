@@ -32,5 +32,5 @@ In this example the admin PIN is first validated, then all three values are set 
 5 retries:
 ....
  $ gpg-connect-agent --hex "scd apdu 00 20 00 83 08 31 32 33 34 35 36 37 38" \
-   "scd apdu scd apdu 00 f2 00 00 03 05 05 05"
+   "scd apdu 00 f2 00 00 03 05 05 05" /bye
 ....
