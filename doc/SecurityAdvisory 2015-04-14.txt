@@ -1,0 +1,179 @@
+Security Advisory for ykneo-openpgp
+===================================
+
+Tracking IDs: YSA-2015-1 and CVE-2015-3298.
+
+Background
+----------
+
+The YubiKey NEO is a flexible security product from Yubico that
+implements the Yubico One-Time Password technology, FIDO Universal 2nd
+Factor, OATH codes, PIV card, and OpenPGP card functionality.  The
+on-card OpenPGP software of the YubiKey NEO is implemented by the free
+and open-source software (FOSS) project "ykneo-openpgp", forked from
+an earlier implementation called “javacardopenpgp”.
+
+Links:
+
+* https://www.yubico.com/
+* https://developers.yubico.com/ykneo-openpgp/
+* https://github.com/Yubico/ykneo-openpgp
+* http://sourceforge.net/projects/javacardopenpgp/
+
+Summary
+-------
+
+The source code contains a logical flaw related to user
+PIN (aka PW1) verification that allows an attacker with local host privileges
+and/or physical proximity (NFC) to perform security operations without
+knowledge of the user's PIN code.
+
+Mitigation
+----------
+
+The flaw is mitigated by the fact that an attacker would typically
+require some abilities that would enable the attack even without the
+logical flaw.
+
+In particular, any attacker with access to the local host must be
+assumed to be able to learn the user's PIN code, simply by
+intercepting communication with the OpenPGP card hardware or through
+key logging.
+
+Alternatively, if the attacker has physical proximity to the card, it
+could wait for the device to be used normally over NFC and then learn
+the PIN code wirelessly and perform the attack at a later point.
+
+If your device is stolen, attackers may use it to perform private-key
+operations.  If an attacker has gone through the trouble of obtaining
+physical access to a key, the conservative approach is to regard it is
+possible that the attacker were able to learn the PIN earlier since the
+PIN is often unprotected.  In situations like this, you should treat the
+key as potentially compromised and revoke the key.
+
+Generally the OpenPGP Card specification does not protect against
+private key-usage by malware and/or PIN phishing, and any OpenPGP Card
+implementation is vulnerable to similar attacks.
+
+Note that the private key is not at jeopardy, and malware cannot learn
+the private key -- this is in fact the primary threat that the
+OpenPGP card specification protects against.
+
+Analysis
+--------
+
+The following description is courtesy of Joey Castillo.
+
+The bug appears to be a typo in the first line of the
+computeDigitalSignature, decipher and internalAuthenticate
+methods. The goal of each is to establish that the PW1 has been
+validated, AND the proper mode has been set (mode 81 for signing, mode
+82 for everything else). According to the spec, if either of these
+conditions are not satisfied, the security operation should not
+proceed.
+
+The application mangles this a bit, as you can see in line 628:
+
+https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L628
+
+ if (!pw1.isValidated() && pw1_modes[PW1_MODE_NO81])
+     ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+ // otherwise execution continues
+
+This truth table shows the outcome of the conditional, and the two
+cases where the logic fails:
+
+Case | PIN valid | Mode 81 | !(PIN valid) | Result | Outcome
+-----|-----------|---------|--------------|--------|--------------
+  1  | true      | true    | false        | false  | No exception
+  2  | false     | true    | true         | true   | Exception thrown
+  3  | true      | false   | false        | false  | No exception (Incorrect)
+  4  | false     | false   | true         | false  | No exception (Incorrect)
+
+I discovered this bug due to case #3: OpenKeychain for Android
+mistakenly verifies the PIN with mode 82 for signing, which should not
+allow a signature to be generated. The Yubikey generates a signature
+anyway.
+
+The dire case is #4: when the card is powered up, the PIN has not been
+validated, and both modes are set to false. In this state, the card
+will issue a signature even though the PIN has not been validated. The
+same bug is present in the decipher command (line 659) and the
+internalAuthenticate command (line 683), just with the mode set to
+82. This means the card will also decrypt session keys and
+authenticate challenges unconditionally.
+
+https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L659
+
+https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L683
+
+Solution
+--------
+
+This is also courtesy of Joey Castillo.
+
+The fix is to change each of the conditionals to the following:
+
+ if (!pw1.isValidated() || !pw1_modes[PW1_MODE_NO8x])
+     ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+ // otherwise execution continues
+
+This way, if the PIN has not been validated, OR the proper mode has
+not been set, an exception is thrown. Execution is only allowed to
+continue if both conditions are true.
+
+This fix has been integrated into ykneo-openpgp and is part of the
+version 1.0.9 release.
+
+How to check if you are affected
+--------------------------------
+
+Versions below 1.0.9 are affected by this problem.  You may check the
+applet version with the following command.
+
+....
+ $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye
+ D[0000]  01 00 06 90 00                                     .....           
+ OK
+....
+
+The string "01 00 06" means version 1.0.6, which would be affected by
+this problem.
+
+Recommendation
+--------------
+
+The logical flaw is real and violates assumption of how the OpenPGP
+applet works in principle.  However its practical consequences are
+relatively small as a successful attack requires other privileged
+operations (such as local root access) that are normally not available
+to an attacker, and would have undermined the security anyway.
+
+Therefore, we don't see any immediate need for users to upgrade existing
+deployed products.  We will incorporate the improved code in future
+products sold, and add self-tests to our software project to detect any regression in this area.
+
+For stolen devices, we continue to recommend users to follow best-practices and revoke the key as a conservative measure.
+
+As we take all security related incidents seriously we have prepared a
+prompt security advisory and released all information about this
+incident that we know about.  We welcome further analysis of the
+source code, as this will over time increase confidence in the
+product, and is the reason the source is available.
+
+If you have additional inquiries related to your YubiKey NEO purchase,
+please contact your sales contact for further discussion.
+
+Related projects
+----------------
+
+This defect was present in the code we inherited from the “javacardopenpgp” project, and that project has been notified.  There may be other forks, public or not, and we recommend the community to review other code with the same origin.
+
+History of events
+-----------------
+
+* 2015-04-11 Reported by Joey Castillo.
+* 2015-04-11 Version 1 of security advisory circulated for review.
+* 2015-04-13 Mitre assigned id for vulnerability as CVE-2015-3298.
+* 2015-04-13 Upstream project “javacardopenpgp” notified.
+* 2015-04-14 Security advisory published.
