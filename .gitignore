@@ -13,3 +13,11 @@ ykneo-openpgp-*.tar.gz.sig
 test/.classpath
 test/.project
 test/lib/jcardsim-2.2.2-all.jar
+jacoco.exec
+jacoco.xml
+jacoco/
+test/lib/asm-debug-all.jar
+test/lib/jacoco.jar
+test/lib/jacocoagent.jar
+test/lib/jacocoant.jar
+test/lib/jacocoreport.jar

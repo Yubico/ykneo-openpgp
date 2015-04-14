@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <!-- This file is only used for run the coveralls-maven-plugin -->
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>com.yubico</groupId>
+    <artifactId>ykneo-openpgp-coverage</artifactId>
+    <version>0.0.0</version>
+    <packaging>pom</packaging>
+    <description>Coverage only maven config for ykneo-openpgp</description>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.eluder.coveralls</groupId>
+                <artifactId>coveralls-maven-plugin</artifactId>
+                <version>3.0.1</version>
+                <configuration>
+                    <sourceDirectories>
+                        <sourceDirectory>applet/src/</sourceDirectory>
+                    </sourceDirectories>
+                    <jacocoReports>
+                        <jacocoReport>jacoco.xml</jacocoReport>
+                    </jacocoReports>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -5,3 +5,11 @@ before_install:
   - curl -L https://github.com/licel/jcardsim/raw/jc2.2.2/jcardsim-2.2.2-all.jar -o test/lib/jcardsim-2.2.2-all.jar
 script:
   - ant -Dtest.build.mock=1 test
+after_success:
+  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.core/0.7.4.201502262128/org.jacoco.core-0.7.4.201502262128.jar -o test/lib/jacoco.jar
+  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.ant/0.7.4.201502262128/org.jacoco.ant-0.7.4.201502262128.jar -o test/lib/jacocoant.jar
+  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.agent/0.7.4.201502262128/org.jacoco.agent-0.7.4.201502262128.jar -o test/lib/jacocoagent.jar
+  - curl -L https://search.maven.org/remotecontent?filepath=org/jacoco/org.jacoco.report/0.7.4.201502262128/org.jacoco.report-0.7.4.201502262128.jar -o test/lib/jacocoreport.jar
+  - curl -L https://search.maven.org/remotecontent?filepath=org/ow2/asm/asm-debug-all/5.0.3/asm-debug-all-5.0.3.jar -o test/lib/asm-debug-all.jar
+  - ant -Dtest.build.mock=1 coverage
+  - mvn coveralls:report
