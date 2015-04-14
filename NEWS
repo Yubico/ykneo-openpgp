@@ -1,5 +1,7 @@
 ykneo-openpgp NEWS -- History of changes.
 
+* Version 1.0.10 (unreleased)
+
 * Version 1.0.9 (released 2015-04-14)
 
 ** Fix a security vulnerability where private key operations where
