@@ -74,7 +74,7 @@ proceed.
 
 The application mangles this a bit, as you can see in line 628:
 
-https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L628
+https://github.com/Yubico/ykneo-openpgp/blob/f82f3e4dc80e4476e90411bc837c52d6e1c9355f/applet/src/openpgpcard/OpenPGPApplet.java#L628
 
  if (!pw1.isValidated() && pw1_modes[PW1_MODE_NO81])
      ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
@@ -105,9 +105,9 @@ internalAuthenticate command (line 683), just with the mode set to
 82. This means the card will also decrypt session keys and
 authenticate challenges unconditionally.
 
-https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L659
+https://github.com/Yubico/ykneo-openpgp/blob/f82f3e4dc80e4476e90411bc837c52d6e1c9355f/applet/src/openpgpcard/OpenPGPApplet.java#L659
 
-https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenPGPApplet.java#L683
+https://github.com/Yubico/ykneo-openpgp/blob/f82f3e4dc80e4476e90411bc837c52d6e1c9355f/applet/src/openpgpcard/OpenPGPApplet.java#L683
 
 Solution
 --------
