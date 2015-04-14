@@ -1,6 +1,11 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.9 (unreleased)
+* Version 1.0.9 (released 2015-04-14)
+
+** Fix a security vulnerability where private key operations where
+available without validated PIN. Reported by Joey Castillo.
+
+** Fix nesting of discretionary data objects within application related data.
 
 * Version 1.0.8 (released 2014-09-26)
 
