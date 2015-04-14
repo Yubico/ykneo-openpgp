@@ -157,6 +157,78 @@ public class OpenPGPAppletTest {
 		assertArrayEquals(expect, resp);
 	}
 
+	@Test
+	public void testSignWithoutPin() {
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb6};
+		simulator.transmitCommand(command);
+
+		command = new byte[]{0x00, 0x2A, (byte) 0x9E, (byte) 0x9A, 0x23, 0x30,
+				0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05,
+				0x00, 0x04, 0x14, 0x17, 0x53, 0x5F, 0x4B, (byte) 0x91, 0x59,
+				(byte) 0xF1, (byte) 0xA8, (byte) 0x9D, 0x69, (byte) 0xEB, 0x75,
+				(byte) 0xE7, 0x5E, (byte) 0x9E, 0x20, 0x24, (byte) 0xEF, 0x48,
+				(byte) 0xE9, 0x00};
+		byte[] resp = simulator.transmitCommand(command); // do a sign without pin first, should fail
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		resp = simulator.transmitCommand(command); // still fail..
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		resp = simulator.transmitCommand(command); // should succeed
+		assertEquals(257, resp.length);
+	}
+
+	@Test
+	public void testDecipherWithoutPin() {
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb8};
+		simulator.transmitCommand(command);
+
+		command = new byte[]{0x00, 0x2A, (byte) 0x80, (byte) 0x86, 0x23, 0x30,
+				0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05,
+				0x00, 0x04, 0x14, 0x17, 0x53, 0x5F, 0x4B, (byte) 0x91, 0x59,
+				(byte) 0xF1, (byte) 0xA8, (byte) 0x9D, 0x69, (byte) 0xEB, 0x75,
+				(byte) 0xE7, 0x5E, (byte) 0x9E, 0x20, 0x24, (byte) 0xEF, 0x48,
+				(byte) 0xE9, 0x00};
+		byte[] resp = simulator.transmitCommand(command); // do a decipher without pin first, should fail
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		resp = simulator.transmitCommand(command); // still fail..
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		resp = simulator.transmitCommand(command); // should (kindof) succeed
+		assertArrayEquals(new byte[] {0x00, 0x05}, resp); // 0x05 means an exception is thrown because this can't be decrypted
+	}
+
+	@Test
+	public void testAuthenticateWithoutPin() {
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xa4};
+		simulator.transmitCommand(command);
+
+		command = new byte[]{0x00, (byte) 0x88, 0x00, 0x00, 0x23, 0x30,
+				0x21, 0x30, 0x09, 0x06, 0x05, 0x2B, 0x0E, 0x03, 0x02, 0x1A, 0x05,
+				0x00, 0x04, 0x14, 0x17, 0x53, 0x5F, 0x4B, (byte) 0x91, 0x59,
+				(byte) 0xF1, (byte) 0xA8, (byte) 0x9D, 0x69, (byte) 0xEB, 0x75,
+				(byte) 0xE7, 0x5E, (byte) 0x9E, 0x20, 0x24, (byte) 0xEF, 0x48,
+				(byte) 0xE9, 0x00};
+		byte[] resp = simulator.transmitCommand(command); // do an authenticate without pin first, should fail
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		resp = simulator.transmitCommand(command); // still fail..
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
+
+		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		resp = simulator.transmitCommand(command); // should succeed
+		assertEquals(257, resp.length);
+	}
+
 	private boolean doVerify(String pin, byte mode) {
 		byte[] command = new byte[5 + pin.length()];
 		command[1] = 0x20;
