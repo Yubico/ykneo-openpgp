@@ -83,12 +83,14 @@ https://github.com/Yubico/ykneo-openpgp/blob/master/applet/src/openpgpcard/OpenP
 This truth table shows the outcome of the conditional, and the two
 cases where the logic fails:
 
-Case | PIN valid | Mode 81 | !(PIN valid) | Result | Outcome
------|-----------|---------|--------------|--------|--------------
-  1  | true      | true    | false        | false  | No exception
-  2  | false     | true    | true         | true   | Exception thrown
-  3  | true      | false   | false        | false  | No exception (Incorrect)
-  4  | false     | false   | true         | false  | No exception (Incorrect)
+[options="header"]
+|==================================================================
+|Case | PIN valid | Mode 81 | !(PIN valid) | Result | Outcome
+|  1  | true      | true    | false        | false  | No exception
+|  2  | false     | true    | true         | true   | Exception thrown
+|  3  | true      | false   | false        | false  | No exception (Incorrect)
+|  4  | false     | false   | true         | false  | No exception (Incorrect)
+|==================================================================
 
 I discovered this bug due to case #3: OpenKeychain for Android
 mistakenly verifies the PIN with mode 82 for signing, which should not
@@ -133,7 +135,7 @@ applet version with the following command.
 
 ....
  $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye
- D[0000]  01 00 06 90 00                                     .....           
+ D[0000]  01 00 06 90 00                                     .....
  OK
 ....
 
@@ -151,9 +153,11 @@ to an attacker, and would have undermined the security anyway.
 
 Therefore, we don't see any immediate need for users to upgrade existing
 deployed products.  We will incorporate the improved code in future
-products sold, and add self-tests to our software project to detect any regression in this area.
+products sold, and add self-tests to our software project to detect any
+regression in this area.
 
-For stolen devices, we continue to recommend users to follow best-practices and revoke the key as a conservative measure.
+For stolen devices, we continue to recommend users to follow best-practices
+and revoke the key as a conservative measure.
 
 As we take all security related incidents seriously we have prepared a
 prompt security advisory and released all information about this
@@ -167,7 +171,10 @@ please contact your sales contact for further discussion.
 Related projects
 ----------------
 
-This defect was present in the code we inherited from the “javacardopenpgp” project, and that project has been notified.  There may be other forks, public or not, and we recommend the community to review other code with the same origin.
+This defect was present in the code we inherited from the “javacardopenpgp”
+project, and that project has been notified.  There may be other forks, public
+or not, and we recommend the community to review other code with the same
+origin.
 
 History of events
 -----------------
