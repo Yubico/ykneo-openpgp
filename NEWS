@@ -1,6 +1,9 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.10 (unreleased)
+* Version 1.0.10 (released 2015-04-20)
+
+** Fixup release since some YubiKeys where misstakenly shipped
+with the version number 1.0.9 before that was released.
 
 * Version 1.0.9 (released 2015-04-14)
 
