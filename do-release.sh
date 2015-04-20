@@ -21,7 +21,7 @@ if ! head -3 NEWS  | grep -q "Version $VERSION .released `date -I`"; then
   exit
 fi
 
-if ! cat applet/src/openpgpcard/OpenPGPApplet.java | grep -q "VERSION = { `echo $VERSION | awk -F. '{print "0x0" $1 ", 0x0"$2 ", 0x0"$3}'`"; then
+if ! cat applet/src/openpgpcard/OpenPGPApplet.java | grep -q "VERSION = { `echo $VERSION | awk -F. '{print "0x0" $1 ", 0x0"$2 ", 0x"$3}'`"; then
   echo "You need to update version in OpenPGPApplet.java"
   exit
 fi
