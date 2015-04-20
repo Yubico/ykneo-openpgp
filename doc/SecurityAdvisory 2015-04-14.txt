@@ -125,13 +125,19 @@ not been set, an exception is thrown. Execution is only allowed to
 continue if both conditions are true.
 
 This fix has been integrated into ykneo-openpgp and is part of the
-version 1.0.9 release.
+version 1.0.9 release, but read on for some information about 1.0.10.
 
 How to check if you are affected
 --------------------------------
 
-Versions below 1.0.9 are affected by this problem.  You may check the
-applet version with the following command.
+Versions below 1.0.9 are affected by this problem.  Unfortunately,
+some YubiKey NEOs shipped with a 1.0.9 release that did not contain
+the fix.  To simplify version checking, we have released 1.0.10 and
+NEOs using that version is known to always include the fix.  To be
+certain that your NEO has the fixed ykneo-openpgp applet installed,
+look for a version of 1.0.10 or later.
+
+You may check the applet version with the following command.
 
 ....
  $ gpg-connect-agent --hex "scd apdu 00 f1 00 00" /bye
@@ -184,3 +190,5 @@ History of events
 * 2015-04-13 Mitre assigned id for vulnerability as CVE-2015-3298.
 * 2015-04-13 Upstream project “javacardopenpgp” notified.
 * 2015-04-14 Security advisory published.
+* 2015-04-20 Some 1.0.9 NEOs were shipped without the fix, text updated
+             to recommend looking for 1.0.10 as a better minimum version.
