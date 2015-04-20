@@ -1235,7 +1235,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (buffer[offset++] != (byte) 0x97)
 			ISOException.throwIt(SW_DATA_INVALID);
 		short len_modulus = getLength(buffer, offset);
-		offset += getLengthBytes(len_dq1);
+		offset += getLengthBytes(len_modulus);
 
 		if (buffer[offset_data++] != 0x5F || buffer[offset_data++] != 0x48)
 			ISOException.throwIt(SW_DATA_INVALID);
