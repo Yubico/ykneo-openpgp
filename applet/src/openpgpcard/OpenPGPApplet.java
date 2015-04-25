@@ -627,21 +627,22 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short computeDigitalSignature(APDU apdu) {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO81]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+		if (!sig_key.getPrivate().isInitialized())
+			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
 		if (pw1_status == (byte) 0x00)
 			pw1_modes[PW1_MODE_NO81] = false;
 
-		if (!sig_key.getPrivate().isInitialized())
-			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
-
-		// Copy data to be signed to tmp
-		short length = Util
-				.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
+		// initialize cipher instance
 		cipher.init(sig_key.getPrivate(), Cipher.MODE_ENCRYPT);
+		// increment the signature counter
 		increaseDSCounter();
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		// perform the operation
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		// return length of result
+		return length;
 	}
 
 	/**
