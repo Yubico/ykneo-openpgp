@@ -132,8 +132,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private Cipher cipher;
 	private RandomData random;
 
-	private byte[] tmp;
-
 	private byte[] buffer;
 	private short out_left = 0;
 	private short out_sent = 0;
@@ -198,8 +196,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	public OpenPGPApplet() {
 		// Create temporary arrays
-		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
 		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
 				JCSystem.CLEAR_ON_DESELECT);
 		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
