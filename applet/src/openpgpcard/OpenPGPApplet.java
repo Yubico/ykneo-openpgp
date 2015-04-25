@@ -656,19 +656,23 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	 * @return Length of data written in buffer
 	 */
 	private short decipher(APDU apdu) {
-		// DECIPHER
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 		if (!dec_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be decrypted to tmp, omit padding indicator
-		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
-				(short) (in_received - 1));
-
+		// compute length of actual message (first byte indicates padding)
+		short srcLen = (short)(in_received - 1);
+		// offset for plaintext (after ciphertext)
+		short resOff = in_received;
+		// initialize cipher instance
 		cipher.init(dec_key.getPrivate(), Cipher.MODE_DECRYPT);
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		// perform the operation
+		short resLen = cipher.doFinal(buffer, (short)1, srcLen, buffer, resOff);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, resOff, buffer, _0, resLen);
+		// return length of result
+		return resLen;
 	}
 
 	/**
