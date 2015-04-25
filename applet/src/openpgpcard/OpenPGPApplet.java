@@ -687,13 +687,17 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short internalAuthenticate(APDU apdu) {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
-		Util.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
 		if (!auth_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
+		// initialize cipher instance
 		cipher.init(auth_key.getPrivate(), Cipher.MODE_ENCRYPT);
-		return cipher.doFinal(tmp, _0, in_received, buffer, _0);
+		// perform the operation
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		// return length of result
+		return length;
 	}
 
 	/**
