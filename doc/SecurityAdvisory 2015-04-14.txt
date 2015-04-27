@@ -3,6 +3,11 @@ Security Advisory for ykneo-openpgp
 
 Tracking IDs: YSA-2015-1 and CVE-2015-3298.
 
+*Update; April, 27, 2015: Yubico will replace your YubiKey NEO if you are
+using the OpenPGP applet version 1.0.9 or earlier (as described in this
+advisory). Go to yubi.co/support to learn how to log a support ticket and
+receive a replacement.*
+
 Background
 ----------
 
@@ -192,3 +197,4 @@ History of events
 * 2015-04-14 Security advisory published.
 * 2015-04-20 Some 1.0.9 NEOs were shipped without the fix, text updated
              to recommend looking for 1.0.10 as a better minimum version.
+* 2015-04-27 Add an update about Yubico replacement policy.
