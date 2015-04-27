@@ -31,5 +31,5 @@ The OpenPGP Card applet is typically used through GnuPG so we refer to
 its documentation for the full reference: http://www.gnupg.org/
 
 We have tutorials on specific topics in at
-https://developers.yubico.com/PGP[developers.yubico.com/PGP], for example card
-editing and key import.
+https://developers.yubico.com/PGP, for example card editing and key
+import.
