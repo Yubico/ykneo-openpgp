@@ -1280,11 +1280,11 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// determine length of modulus tag
 		final short modLen = key.getModulusLength();
-		short modTagLen = (short)(1 + sizeLength(modLen) + modLen);
+		short modTagLen = (short)(1 + getLengthBytes(modLen) + modLen);
 
 		// determine length of exponent tag
 		final short expLen = key.getExponentLength();
-		short expTagLen = (short)(1 + sizeLength(expLen) + expLen);
+		short expTagLen = (short)(1 + getLengthBytes(expLen) + expLen);
 
 		// compute size of all child tags
 		final short tagsLen = (short)(modTagLen + expTagLen);
@@ -1309,31 +1309,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// done
 		return offset;
-	}
-
-	private short sizeLength(short length) {
-		if(length < 128) {
-			return 1;
-		} else if(length < 256) {
-			return 2;
-		} else {
-			return 3;
-		}
-	}
-
-	private short putLength(byte[] dst, short offset, short length) {
-		if(length < 128) {
-			dst[offset++] = (byte)length;
-			return 1;
-		} else if(length < 256) {
-			dst[offset++] = (byte)0x81;
-			dst[offset++] = (byte)length;
-			return 2;
-		} else {
-			buffer[offset++] = (byte)0x82;
-			Util.setShort(buffer, offset, length);
-			return 3;
-		}
 	}
 
 	/**
@@ -1475,6 +1450,29 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		else
 			return 3;
 	}
+
+    /**
+     * Write a length to a buffer in TLV encoding.
+     *
+     * @param dst buffer to write to
+     * @param offset to write at
+     * @param length the length to be written
+     * @return length of encoded length element in buffer
+     */
+    private short putLength(byte[] dst, short offset, short length) {
+        if(length < 128) {
+            dst[offset++] = (byte)length;
+            return 1;
+        } else if(length < 256) {
+            dst[offset++] = (byte)0x81;
+            dst[offset++] = (byte)length;
+            return 2;
+        } else {
+            buffer[offset++] = (byte)0x82;
+            Util.setShort(buffer, offset, length);
+            return 3;
+        }
+    }
 
 	/**
 	 * Return the key of the type requested: - B6: Digital signatures - B8:
