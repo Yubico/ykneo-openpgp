@@ -132,8 +132,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private Cipher cipher;
 	private RandomData random;
 
-	private byte[] tmp;
-
 	private byte[] buffer;
 	private short out_left = 0;
 	private short out_sent = 0;
@@ -198,8 +196,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 	public OpenPGPApplet() {
 		// Create temporary arrays
-		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
 		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
 				JCSystem.CLEAR_ON_DESELECT);
 		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
@@ -627,21 +623,22 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short computeDigitalSignature(APDU apdu) {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO81]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+		if (!sig_key.getPrivate().isInitialized())
+			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
 		if (pw1_status == (byte) 0x00)
 			pw1_modes[PW1_MODE_NO81] = false;
 
-		if (!sig_key.getPrivate().isInitialized())
-			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
-
-		// Copy data to be signed to tmp
-		short length = Util
-				.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
+		// initialize cipher instance
 		cipher.init(sig_key.getPrivate(), Cipher.MODE_ENCRYPT);
+		// increment the signature counter
 		increaseDSCounter();
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		// perform the operation
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		// return length of result
+		return length;
 	}
 
 	/**
@@ -655,19 +652,23 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	 * @return Length of data written in buffer
 	 */
 	private short decipher(APDU apdu) {
-		// DECIPHER
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 		if (!dec_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be decrypted to tmp, omit padding indicator
-		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
-				(short) (in_received - 1));
-
+		// compute length of actual message (first byte indicates padding)
+		short srcLen = (short)(in_received - 1);
+		// offset for plaintext (after ciphertext)
+		short resOff = in_received;
+		// initialize cipher instance
 		cipher.init(dec_key.getPrivate(), Cipher.MODE_DECRYPT);
-
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		// perform the operation
+		short resLen = cipher.doFinal(buffer, (short)1, srcLen, buffer, resOff);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, resOff, buffer, _0, resLen);
+		// return length of result
+		return resLen;
 	}
 
 	/**
@@ -682,13 +683,17 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short internalAuthenticate(APDU apdu) {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
-		Util.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
 		if (!auth_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
+		// initialize cipher instance
 		cipher.init(auth_key.getPrivate(), Cipher.MODE_ENCRYPT);
-		return cipher.doFinal(tmp, _0, in_received, buffer, _0);
+		// perform the operation
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		// copy the result back to the start of buffer
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		// return length of result
+		return length;
 	}
 
 	/**
@@ -1273,46 +1278,36 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short sendPublicKey(PGPKey key) {
 		RSAPublicKey pubkey = key.getPublic();
 
-		// Build message in tmp
+		// determine length of modulus tag
+		final short modLen = key.getModulusLength();
+		short modTagLen = (short)(1 + getLengthBytes(modLen) + modLen);
+
+		// determine length of exponent tag
+		final short expLen = key.getExponentLength();
+		short expTagLen = (short)(1 + getLengthBytes(expLen) + expLen);
+
+		// compute size of all child tags
+		final short tagsLen = (short)(modTagLen + expTagLen);
+
+		// build message in buffer
 		short offset = 0;
 
-		// 81 - Modulus
-		tmp[offset++] = (byte) 0x81;
-
-		// Length of modulus is always greater than 128 bytes
-		if (key.getModulusLength() < 256) {
-			tmp[offset++] = (byte) 0x81;
-			tmp[offset++] = (byte) key.getModulusLength();
-		} else {
-			tmp[offset++] = (byte) 0x82;
-			offset = Util.setShort(tmp, offset, key.getModulusLength());
-		}
-		pubkey.getModulus(tmp, offset);
-		offset += key.getModulusLength();
-
-		// 82 - Exponent
-		tmp[offset++] = (byte) 0x82;
-		tmp[offset++] = (byte) key.getExponentLength();
-		pubkey.getExponent(tmp, offset);
-		offset += key.getExponentLength();
-
-		short len = offset;
-
-		offset = 0;
-
+		// toplevel tag 0x7F (Public Key)
 		buffer[offset++] = 0x7F;
 		buffer[offset++] = 0x49;
+		offset += putLength(buffer, offset, tagsLen);
 
-		if (len < 256) {
-			buffer[offset++] = (byte) 0x81;
-			buffer[offset++] = (byte) len;
-		} else {
-			buffer[offset++] = (byte) 0x82;
-			offset = Util.setShort(buffer, offset, len);
-		}
+		// child tag 0x81 (Modulus)
+		buffer[offset++] = (byte)0x81;
+		offset += putLength(buffer, offset, modLen);
+		offset += pubkey.getModulus(buffer, offset);
 
-		offset = Util.arrayCopyNonAtomic(tmp, _0, buffer, offset, len);
+		// child tag 0x82 (Exponent)
+		buffer[offset++] = (byte)0x82;
+		offset += putLength(buffer, offset, expLen);
+		offset += pubkey.getExponent(buffer, offset);
 
+		// done
 		return offset;
 	}
 
@@ -1455,6 +1450,29 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		else
 			return 3;
 	}
+
+    /**
+     * Write a length to a buffer in TLV encoding.
+     *
+     * @param dst buffer to write to
+     * @param offset to write at
+     * @param length the length to be written
+     * @return length of encoded length element in buffer
+     */
+    private short putLength(byte[] dst, short offset, short length) {
+        if(length < 128) {
+            dst[offset++] = (byte)length;
+            return 1;
+        } else if(length < 256) {
+            dst[offset++] = (byte)0x81;
+            dst[offset++] = (byte)length;
+            return 2;
+        } else {
+            buffer[offset++] = (byte)0x82;
+            Util.setShort(buffer, offset, length);
+            return 3;
+        }
+    }
 
 	/**
 	 * Return the key of the type requested: - B6: Digital signatures - B8:
