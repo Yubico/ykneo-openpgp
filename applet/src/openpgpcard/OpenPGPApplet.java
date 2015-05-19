@@ -132,8 +132,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private Cipher cipher;
 	private RandomData random;
 
-	private byte[] tmp;
-
 	private byte[] buffer;
 	private short out_left = 0;
 	private short out_sent = 0;
@@ -197,9 +195,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	}
 
 	public OpenPGPApplet() {
-		// Create temporary arrays
-		tmp = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
-				JCSystem.CLEAR_ON_DESELECT);
+		// Create temporary array
 		buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
 				JCSystem.CLEAR_ON_DESELECT);
 		pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
@@ -634,14 +630,12 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!sig_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be signed to tmp
-		short length = Util
-				.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
-
 		cipher.init(sig_key.getPrivate(), Cipher.MODE_ENCRYPT);
 		increaseDSCounter();
 
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		return length;
 	}
 
 	/**
@@ -661,13 +655,12 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!dec_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
-		// Copy data to be decrypted to tmp, omit padding indicator
-		short length = Util.arrayCopyNonAtomic(buffer, (short) 1, tmp, _0,
-				(short) (in_received - 1));
-
 		cipher.init(dec_key.getPrivate(), Cipher.MODE_DECRYPT);
 
-		return cipher.doFinal(tmp, _0, length, buffer, _0);
+		// Start at offset 1 to omit padding indicator byte
+		short length = cipher.doFinal(buffer, (short)1, (short) (in_received - 1), buffer, in_received);
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		return length;
 	}
 
 	/**
@@ -682,13 +675,14 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short internalAuthenticate(APDU apdu) {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
-		Util.arrayCopyNonAtomic(buffer, _0, tmp, _0, in_received);
 
 		if (!auth_key.getPrivate().isInitialized())
 			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
 
 		cipher.init(auth_key.getPrivate(), Cipher.MODE_ENCRYPT);
-		return cipher.doFinal(tmp, _0, in_received, buffer, _0);
+		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
+		Util.arrayCopyNonAtomic(buffer, in_received, buffer, _0, length);
+		return length;
 	}
 
 	/**
@@ -1273,45 +1267,36 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short sendPublicKey(PGPKey key) {
 		RSAPublicKey pubkey = key.getPublic();
 
-		// Build message in tmp
+		// Build message in buffer
 		short offset = 0;
-
-		// 81 - Modulus
-		tmp[offset++] = (byte) 0x81;
-
-		// Length of modulus is always greater than 128 bytes
-		if (key.getModulusLength() < 256) {
-			tmp[offset++] = (byte) 0x81;
-			tmp[offset++] = (byte) key.getModulusLength();
-		} else {
-			tmp[offset++] = (byte) 0x82;
-			offset = Util.setShort(tmp, offset, key.getModulusLength());
-		}
-		pubkey.getModulus(tmp, offset);
-		offset += key.getModulusLength();
-
-		// 82 - Exponent
-		tmp[offset++] = (byte) 0x82;
-		tmp[offset++] = (byte) key.getExponentLength();
-		pubkey.getExponent(tmp, offset);
-		offset += key.getExponentLength();
-
-		short len = offset;
-
-		offset = 0;
 
 		buffer[offset++] = 0x7F;
 		buffer[offset++] = 0x49;
+		buffer[offset++] = (byte) 0x82;
+		short offsetForLength = offset;
+		offset += 2;
 
-		if (len < 256) {
+		// 81 - Modulus
+		buffer[offset++] = (byte) 0x81;
+
+		// Length of modulus is always greater than 128 bytes
+		if (key.getModulusLength() < 256) {
 			buffer[offset++] = (byte) 0x81;
-			buffer[offset++] = (byte) len;
+			buffer[offset++] = (byte) key.getModulusLength();
 		} else {
 			buffer[offset++] = (byte) 0x82;
-			offset = Util.setShort(buffer, offset, len);
+			offset = Util.setShort(buffer, offset, key.getModulusLength());
 		}
+		pubkey.getModulus(buffer, offset);
+		offset += key.getModulusLength();
 
-		offset = Util.arrayCopyNonAtomic(tmp, _0, buffer, offset, len);
+		// 82 - Exponent
+		buffer[offset++] = (byte) 0x82;
+		buffer[offset++] = (byte) key.getExponentLength();
+		pubkey.getExponent(buffer, offset);
+		offset += key.getExponentLength();
+
+		Util.setShort(buffer, offsetForLength, (short)(offset - offsetForLength - 2));
 
 		return offset;
 	}
