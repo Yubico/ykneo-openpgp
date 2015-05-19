@@ -51,9 +51,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] VERSION = { 0x01, 0x00, 0x11 };
 
 	private static final byte[] EXTENDED_CAP = { 
-			(byte) 0xF0, // Support for GET CHALLENGE
+			(byte) 0xF8, // Support for GET CHALLENGE
 						 // Support for Key Import
 						 // PW1 Status byte changeable
+						 // Support for private use data objects
 			0x00, // Secure messaging using 3DES
 			0x00, (byte) 0xFF, // Maximum length of challenges
 			0x04, (byte) 0xC0, // Maximum length Cardholder Certificate
@@ -72,6 +73,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static short NAME_MAX_LENGTH = 39;
 	private static short LANG_MAX_LENGTH = 8;
 	private static short CERT_MAX_LENGTH = 1216;
+	private static short PRIVATE_DO_MAX_LENGTH = 254;
 	
 	private static short FP_LENGTH = 20;
 
@@ -107,6 +109,18 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private short cert_length;
 
 	private byte sex;
+
+	private byte[] private_use_do_1;
+	private short private_use_do_1_length;
+
+	private byte[] private_use_do_2;
+	private short private_use_do_2_length;
+
+	private byte[] private_use_do_3;
+	private short private_use_do_3_length;
+
+	private byte[] private_use_do_4;
+	private short private_use_do_4_length;
 
 	private OwnerPIN pw1;
 	private byte pw1_length;
@@ -187,6 +201,15 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		cert_length = 0;
 		sex = 0x39;
 		
+		private_use_do_1 = new byte[PRIVATE_DO_MAX_LENGTH];
+		private_use_do_1_length = 0;
+		private_use_do_2 = new byte[PRIVATE_DO_MAX_LENGTH];
+		private_use_do_2_length = 0;
+		private_use_do_3 = new byte[PRIVATE_DO_MAX_LENGTH];
+		private_use_do_3_length = 0;
+		private_use_do_4 = new byte[PRIVATE_DO_MAX_LENGTH];
+		private_use_do_4_length = 0;
+
 		ds_counter = new byte[3];
 		
 		ca1_fp = new byte[FP_LENGTH];
@@ -940,6 +963,28 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			buffer[offset++] = pw3.getTriesRemaining();
 
 			return offset;
+		// 0101 - Private Use DO 1
+		case (short) 0x0101:
+			return Util.arrayCopyNonAtomic(private_use_do_1, _0, buffer, _0, private_use_do_1_length);
+
+		// 0102 - Private Use DO 2
+		case (short) 0x0102:
+			return Util.arrayCopyNonAtomic(private_use_do_2, _0, buffer, _0, private_use_do_2_length);
+
+		// 0103 - Private Use DO 3
+		case (short) 0x0103:
+			// For private use DO 3, PW1 must be verified with mode 82 to read
+			if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
+				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+		return Util.arrayCopyNonAtomic(private_use_do_3, _0, buffer, _0, private_use_do_3_length);
+
+		// 0104 - Private Use DO 4
+		case (short) 0x0104:
+			// For private use DO 4, PW3 must be verified to read
+			if (!pw3.isValidated())
+				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+		return Util.arrayCopyNonAtomic(private_use_do_4, _0, buffer, _0, private_use_do_4_length);
+
 
 		default:
 			ISOException.throwIt(SW_RECORD_NOT_FOUND);
@@ -960,6 +1005,34 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	 *            Tag of the requested data
 	 */
 	private void putData(short tag) {
+		if(tag == 0x0101 || tag == 0x0103) {
+			// Special case for private use DO's 1 and 3: these can be written if
+			// PW1 is verified with mode 82. All others require PW3 verification.
+			if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
+				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
+			if (in_received > PRIVATE_DO_MAX_LENGTH)
+				ISOException.throwIt(SW_WRONG_LENGTH);
+
+			switch (tag) {
+			// 0101 - Private Use DO 1
+			case 0x0101:
+				JCSystem.beginTransaction();
+				private_use_do_1_length = in_received;
+				Util.arrayCopy(buffer, _0, private_use_do_1, _0, in_received);
+				JCSystem.commitTransaction();
+				break;
+
+			// 0103 - Private Use DO 3
+			case 0x0103:
+				JCSystem.beginTransaction();
+				private_use_do_3_length = in_received;
+				Util.arrayCopy(buffer, _0, private_use_do_3, _0, in_received);
+				JCSystem.commitTransaction();
+				break;
+			}
+			return;
+		}
+
 		if (!pw3.isValidated())
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 
@@ -1157,7 +1230,27 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				offset += key_len;
 			}
 			break;
-			
+
+		// 0102 - Private Use DO 2
+		case 0x0102:
+			if (in_received > PRIVATE_DO_MAX_LENGTH)
+				ISOException.throwIt(SW_WRONG_LENGTH);
+			JCSystem.beginTransaction();
+			private_use_do_2_length = in_received;
+			Util.arrayCopy(buffer, _0, private_use_do_2, _0, in_received);
+			JCSystem.commitTransaction();
+			break;
+
+		// 0104 - Private Use DO 4
+		case 0x0104:
+			if (in_received > PRIVATE_DO_MAX_LENGTH)
+				ISOException.throwIt(SW_WRONG_LENGTH);
+			JCSystem.beginTransaction();
+			private_use_do_4_length = in_received;
+			Util.arrayCopy(buffer, _0, private_use_do_4, _0, in_received);
+			JCSystem.commitTransaction();
+			break;
+
 		default:
 			ISOException.throwIt(SW_RECORD_NOT_FOUND);
 			break;

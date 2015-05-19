@@ -158,6 +158,96 @@ public class OpenPGPAppletTest {
 	}
 
 	@Test
+	public void testPrivateUseDo1() {
+		byte[] data = {0, (byte) 0xda, 0x01, 0x01, 8, 1, 2, 3, 4, 5, 6, 7, 8};
+		byte[] resp = simulator.transmitCommand(data);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO1 fails with no PIN
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(data);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO1 fails with PW3
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(data);
+		assertArrayEquals(success, resp); // PUT DO1 succeeds with PW1 / Mode 82
+
+		simulator.reset();
+		simulator.selectApplet(aid);
+		byte[] expect = {1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0x00};
+		resp = simulator.transmitCommand(new byte[] {0, (byte) 0xca, 0x01, 0x01});
+		assertArrayEquals(expect, resp);
+	}
+
+	@Test
+	public void testPrivateUseDo2() {
+		byte[] data = {0, (byte) 0xda, 0x01, 0x02, 8, 1, 2, 3, 4, 5, 6, 7, 8};
+		byte[] resp = simulator.transmitCommand(data);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO2 fails with no PIN
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(data);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO2 fails with PW1 / Mode 82
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(data);
+		assertArrayEquals(success, resp); // PUT DO2 succeeds with PW3
+
+		simulator.reset();
+		simulator.selectApplet(aid);
+		byte[] expect = {1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0x00};
+		resp = simulator.transmitCommand(new byte[] {0, (byte) 0xca, 0x01, 0x02});
+		assertArrayEquals(expect, resp);
+	}
+
+	@Test
+	public void testPrivateUseDo3() {
+		byte[] putData = {0, (byte) 0xda, 0x01, 0x03, 8, 1, 2, 3, 4, 5, 6, 7, 8};
+		byte[] resp = simulator.transmitCommand(putData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO3 fails with no PIN
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(putData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO3 fails with PW3
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(putData);
+		assertArrayEquals(success, resp); // PUT DO3 succeeds with PW1 / Mode 82
+
+		simulator.reset();
+		simulator.selectApplet(aid);
+		byte[] getData = {0, (byte) 0xca, 0x01, 0x03};
+		byte[] expect = {1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0x00};
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // GET DO3 fails with no PIN
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // GET DO3 fails with PW3
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(expect, resp); // GET DO3 succeeds with PW1 / Mode 82
+	}
+
+	@Test
+	public void testPrivateUseDo4() {
+		byte[] putData = {0, (byte) 0xda, 0x01, 0x04, 8, 1, 2, 3, 4, 5, 6, 7, 8};
+		byte[] resp = simulator.transmitCommand(putData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO4 fails with no PIN
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(putData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // PUT DO4 fails with PW1 / Mode 82
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(putData);
+		assertArrayEquals(success, resp); // PUT DO4 succeeds with PW3
+
+		simulator.reset();
+		simulator.selectApplet(aid);
+		byte[] getData = {0, (byte) 0xca, 0x01, 0x04};
+		byte[] expect = {1, 2, 3, 4, 5, 6, 7, 8, (byte) 0x90, 0x00};
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // GET DO4 fails with no PIN
+		assertEquals(true, doVerify("123456", (byte) 0x82));
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp); // GET DO4 fails with PW1 / Mode 82
+		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		resp = simulator.transmitCommand(getData);
+		assertArrayEquals(expect, resp); // GET DO4 succeeds with PW3
+	}
+
+	@Test
 	public void testSignWithoutPin() {
 		assertEquals(true, doVerify("12345678", (byte) 0x83));
 		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb6};
