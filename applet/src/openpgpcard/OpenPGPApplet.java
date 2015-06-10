@@ -93,6 +93,8 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	private static final byte[] PW3_DEFAULT = { 0x31, 0x32, 0x33, 0x34, 0x35,
 			0x36, 0x37, 0x38 };
 
+	private static final short SW_REFERENCED_DATA_NOT_FOUND = 0x6A88;
+
 	private byte[] loginData;
 	private short loginData_length;
 
@@ -651,7 +653,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			pw1_modes[PW1_MODE_NO81] = false;
 
 		if (!sig_key.getPrivate().isInitialized())
-			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
+			ISOException.throwIt(SW_REFERENCED_DATA_NOT_FOUND);
 
 		cipher.init(sig_key.getPrivate(), Cipher.MODE_ENCRYPT);
 		increaseDSCounter();
@@ -676,7 +678,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		if (!(pw1.isValidated() && pw1_modes[PW1_MODE_NO82]))
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 		if (!dec_key.getPrivate().isInitialized())
-			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
+			ISOException.throwIt(SW_REFERENCED_DATA_NOT_FOUND);
 
 		cipher.init(dec_key.getPrivate(), Cipher.MODE_DECRYPT);
 
@@ -700,7 +702,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 
 		if (!auth_key.getPrivate().isInitialized())
-			ISOException.throwIt(SW_CONDITIONS_NOT_SATISFIED);
+			ISOException.throwIt(SW_REFERENCED_DATA_NOT_FOUND);
 
 		cipher.init(auth_key.getPrivate(), Cipher.MODE_ENCRYPT);
 		short length = cipher.doFinal(buffer, _0, in_received, buffer, in_received);
