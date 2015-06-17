@@ -59,7 +59,7 @@ Thus, we recommend to store the serial number in BCD code so if your
 YubiKey NEO has serial number 4711 you would use xxxxxxxx=00004711.
 
 ...
-install -instAID -instAID D2760001240102000006xxxxxxxx0000 file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
+install -instAID D2760001240102000006xxxxxxxx0000 file ./applet/bin/openpgpcard/javacard/openpgpcard.cap -instParam 00 -priv 00
 ...
 
 
