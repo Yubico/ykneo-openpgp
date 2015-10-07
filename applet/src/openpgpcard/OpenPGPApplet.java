@@ -506,8 +506,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				else
 					pw1_modes[PW1_MODE_NO82] = true;
 			} else {
-				ISOException
-						.throwIt((short) (0x63C0 | pw1.getTriesRemaining()));
+				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 			}
 		} else if (mode == (byte) 0x83) {
 			// Check length of input
@@ -516,8 +515,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			// Check PW3
 			if (!pw3.check(buffer, _0, (byte) in_received)) {
-				ISOException
-						.throwIt((short) (0x63C0 | pw3.getTriesRemaining()));
+				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 			}
 		} else {
 			ISOException.throwIt(SW_INCORRECT_P1P2);
