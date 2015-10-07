@@ -50,6 +50,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 	// returned by vendor specific command f1
 	private static final byte[] VERSION = { 0x01, 0x00, 0x11 };
 
+	// Openpgp defines 6983 as AUTHENTICATION BLOCKED
+	private static final short SW_AUTHENTICATION_BLOCKED = 0x6983;
+
 	private static final byte[] EXTENDED_CAP = { 
 			(byte) 0xF0, // Support for GET CHALLENGE
 						 // Support for Key Import
@@ -500,7 +503,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				ISOException.throwIt(SW_WRONG_DATA);
 
 			// Check given PW1 and set requested mode if verified succesfully
-			if (pw1.check(buffer, _0, (byte) in_received)) {
+			if (pw1.getTriesRemaining() == 0) {
+				ISOException.throwIt(SW_AUTHENTICATION_BLOCKED);
+			} else if (pw1.check(buffer, _0, (byte) in_received)) {
 				if (mode == (byte) 0x81)
 					pw1_modes[PW1_MODE_NO81] = true;
 				else
@@ -514,7 +519,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 				ISOException.throwIt(SW_WRONG_DATA);
 
 			// Check PW3
-			if (!pw3.check(buffer, _0, (byte) in_received)) {
+			if (pw3.getTriesRemaining() == 0) {
+				ISOException.throwIt(SW_AUTHENTICATION_BLOCKED);
+			} else if (!pw3.check(buffer, _0, (byte) in_received)) {
 				ISOException.throwIt(SW_SECURITY_STATUS_NOT_SATISFIED);
 			}
 		} else {
