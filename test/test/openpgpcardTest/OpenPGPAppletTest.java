@@ -52,12 +52,17 @@ public class OpenPGPAppletTest {
 
 	@Test
 	public void testVerify() {
-		assertEquals(true, doVerify("123456", (byte) 0x81));
+		doVerify("123456", (byte) 0x81, true);
+	}
+	
+	@Test
+	public void testBadVerify() {
+		doVerify("654321", (byte) 0x81, false);
 	}
 	
 	@Test
 	public void testGenerate() {
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb6};
 		simulator.transmitCommand(command);
 	}
@@ -65,69 +70,69 @@ public class OpenPGPAppletTest {
 	@Test
 	public void testReset() {
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		doVerify("87654321", (byte) 0x83, false);
 		assertArrayEquals(new byte[] {0, 3, 2}, getPinRetries());
-		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		doVerify("87654321", (byte) 0x83, false);
 		assertArrayEquals(new byte[] {0, 3, 1}, getPinRetries());
-		assertEquals(false, doVerify("87654321", (byte) 0x83));
+		doVerify("87654321", (byte) 0x83, false);
 		assertArrayEquals(new byte[] {0, 3, 0}, getPinRetries());
-		assertEquals(false, doVerify("123456", (byte) 0x81));
+		doVerify("123456", (byte) 0x81, false);
 
 		simulator.transmitCommand(new byte[] {0, (byte) 0xe6, 0, 0});
 		simulator.transmitCommand(new byte[] {0, 0x44, 0, 0});
 
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
-		assertEquals(true, doVerify("123456", (byte) 0x81));
+		doVerify("123456", (byte) 0x81, true);
 	}
 	
 	@Test
 	public void testUnblock() {
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("123456", (byte) 0x81));
+		doVerify("123456", (byte) 0x81, false);
 
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		byte[] res = simulator.transmitCommand(new byte[] {0, 0x2c, 0x02, (byte) 0x81, 0x06,
 				'6', '5', '4', '3', '2', '1'});
 		assertArrayEquals(success,  res);
 				
-		assertEquals(true, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, true);
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 	}
 	
 	@Test
 	public void testRcUnblock() {
 		byte[] newRc = {0, (byte) 0xda, 0, (byte) 0xd3, 8, '8', '7', '6', '5', '4', '3', '2', '1'};
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		assertArrayEquals(success, simulator.transmitCommand(newRc));
 		simulator.reset();
 		simulator.selectApplet(aid);
 		
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {2, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {1, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, false);
 		assertArrayEquals(new byte[] {0, 3, 3}, getPinRetries());
-		assertEquals(false, doVerify("123456", (byte) 0x81));
+		doVerify("123456", (byte) 0x81, false);
 		
 		byte[] res = simulator.transmitCommand(new byte[] {0, 0x2c, 0, (byte) 0x81, 14,
 				'8', '7', '6', '5', '4', '3', '2', '1',
 				'6', '5', '4', '3', '2', '1'});
 		assertArrayEquals(success, res);
-		assertEquals(true, doVerify("654321", (byte) 0x81));
+		doVerify("654321", (byte) 0x81, true);
 		assertArrayEquals(new byte[] {3, 3, 3}, getPinRetries());
 	}
 
@@ -135,7 +140,7 @@ public class OpenPGPAppletTest {
 	public void testSetPintries() {
 		byte[] resp = simulator.transmitCommand(new byte[] {0, (byte) 0xf2, 0, 0, 3, 5, 5, 5});
 		assertArrayEquals(new byte[] {0x69, (byte) 0x85}, resp);
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		resp = simulator.transmitCommand(new byte[] {0, (byte) 0xf2, 0, 0, 3, 5, 6, 7});
 		assertArrayEquals(success, resp);
 		assertArrayEquals(new byte[] {5, 6, 7}, getPinRetries());
@@ -146,7 +151,7 @@ public class OpenPGPAppletTest {
 		byte[] data = {0, (byte) 0xda, 0x7f, 0x21, 8, 1, 2, 3, 4, 5, 6, 7, 8};
 		byte[] resp = simulator.transmitCommand(data);
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		resp = simulator.transmitCommand(data);
 		assertArrayEquals(success, resp);
 
@@ -159,7 +164,7 @@ public class OpenPGPAppletTest {
 
 	@Test
 	public void testSignWithoutPin() {
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb6};
 		simulator.transmitCommand(command);
 
@@ -172,18 +177,18 @@ public class OpenPGPAppletTest {
 		byte[] resp = simulator.transmitCommand(command); // do a sign without pin first, should fail
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		doVerify("123456", (byte) 0x82, true); // now verify pin (mode 82)
 		resp = simulator.transmitCommand(command); // still fail..
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		doVerify("123456", (byte) 0x81, true); // now verify pin (mode 81)
 		resp = simulator.transmitCommand(command); // should succeed
 		assertEquals(257, resp.length);
 	}
 
 	@Test
 	public void testDecipherWithoutPin() {
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xb8};
 		simulator.transmitCommand(command);
 
@@ -196,18 +201,18 @@ public class OpenPGPAppletTest {
 		byte[] resp = simulator.transmitCommand(command); // do a decipher without pin first, should fail
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		doVerify("123456", (byte) 0x81, true); // now verify pin (mode 81)
 		resp = simulator.transmitCommand(command); // still fail..
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		doVerify("123456", (byte) 0x82, true); // now verify pin (mode 82)
 		resp = simulator.transmitCommand(command); // should (kindof) succeed
 		assertArrayEquals(new byte[] {0x00, 0x05}, resp); // 0x05 means an exception is thrown because this can't be decrypted
 	}
 
 	@Test
 	public void testAuthenticateWithoutPin() {
-		assertEquals(true, doVerify("12345678", (byte) 0x83));
+		doVerify("12345678", (byte) 0x83, true);
 		byte[] command = {0x00, 0x47, (byte) 0x80, 0x00, 0x01, (byte) 0xa4};
 		simulator.transmitCommand(command);
 
@@ -220,16 +225,16 @@ public class OpenPGPAppletTest {
 		byte[] resp = simulator.transmitCommand(command); // do an authenticate without pin first, should fail
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x81)); // now verify pin (mode 81)
+		doVerify("123456", (byte) 0x81, true); // now verify pin (mode 81)
 		resp = simulator.transmitCommand(command); // still fail..
 		assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 
-		assertEquals(true, doVerify("123456", (byte) 0x82)); // now verify pin (mode 82)
+		doVerify("123456", (byte) 0x82, true); // now verify pin (mode 82)
 		resp = simulator.transmitCommand(command); // should succeed
 		assertEquals(257, resp.length);
 	}
 
-	private boolean doVerify(String pin, byte mode) {
+	private void doVerify(String pin, byte mode, boolean good) {
 		byte[] command = new byte[5 + pin.length()];
 		command[1] = 0x20;
 		command[3] = mode;
@@ -239,10 +244,10 @@ public class OpenPGPAppletTest {
 			command[offs++] = b;
 		}
 		byte[] resp = simulator.transmitCommand(command);
-		if(resp[0] == (byte)0x90 && resp[1] == 0x00) {
-			return true;
+		if(good) {
+			assertArrayEquals(new byte[] {(byte) 0x90, 0x00}, resp);
 		} else {
-			return false;
+			assertArrayEquals(new byte[] {0x69, (byte) 0x82}, resp);
 		}
 	}
 	
