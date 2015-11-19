@@ -1,6 +1,13 @@
 ykneo-openpgp NEWS -- History of changes.
 
-* Version 1.0.11 (unreleased)
+* Version 1.0.11 (released 2015-11-19)
+
+** Use less transient memory.
+
+** Fix a semi-rare import error where one of the CRT parameters is shorter
+than keylength/2 by padding.
+
+** Correct error codes for some errors.
 
 * Version 1.0.10 (released 2015-04-20)
 
