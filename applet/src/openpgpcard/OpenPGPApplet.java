@@ -44,7 +44,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			0x00 };
 
 	// returned by vendor specific command f1
-	private static final byte[] VERSION = { 0x01, 0x00, 0x11 };
+	private static final byte[] VERSION = { 0x01, 0x00, 0x12 };
 
 	// Openpgp defines 6983 as AUTHENTICATION BLOCKED
 	private static final short SW_AUTHENTICATION_BLOCKED = 0x6983;
