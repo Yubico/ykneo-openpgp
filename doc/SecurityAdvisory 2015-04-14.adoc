@@ -5,8 +5,8 @@ Tracking IDs: YSA-2015-1 and CVE-2015-3298.
 
 *Update; April, 27, 2015: Yubico will replace your YubiKey NEO if you are
 using the OpenPGP applet version 1.0.9 or earlier (as described in this
-advisory). Go to https://yubi.co/support to learn how to log a support
-ticket and receive a replacement.*
+advisory). Go to https://yubi.co/support and provide the order number and
+serial number of the YubiKey NEO device that you need replaced.*
 
 Background
 ----------
