@@ -35,6 +35,8 @@ and doc/InstallCAPFile.txt on how to install it.
 The OpenPGP Card applet is typically used through http://www.gnupg.org[GnuPG]
 so we refer to its documentation for the full reference.
 
+The default PIN set is `123456' and the default admin PIN is `12345678'
+
 We have tutorials on specific topics in at
 https://developers.yubico.com/PGP[developers.yubico.com/PGP], for example card
 editing and key import.
