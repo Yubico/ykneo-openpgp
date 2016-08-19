@@ -289,4 +289,8 @@ public class PGPKey implements ISO7816 {
 	public void setModulus(byte[] buffer, short offset, short length) {
 		((RSAPublicKey) key.getPublic()).setModulus(buffer, offset, length);
 	}
+        
+        public void wipeKey() {
+            key.getPrivate().clearKey();
+        }
 }
