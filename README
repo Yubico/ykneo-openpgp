@@ -1,5 +1,7 @@
 == YubiKey NEO App: OpenPGP
 
+image:https://travis-ci.org/Yubico/ykneo-openpgp.svg?branch=master["Build Status", link="https://travis-ci.org/Yubico/ykneo-openpgp"]
+
 [IMPORTANT]
 ====
 Yubico has learned of a security issue with the OpenPGP Card applet project that is used in the YubiKey NEO. This vulnerability applies to you only if you are using OpenPGP, and you have the OpenPGP applet version 1.0.9 or earlier.
