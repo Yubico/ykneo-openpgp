@@ -2,7 +2,7 @@ language: java
 jdk:
   - openjdk7
 install:
-  - curl -L https://github.com/licel/jcardsim/raw/jc2.2.2/jcardsim-2.2.2-all.jar -o test/lib/jcardsim-2.2.2-all.jar
+  - curl -L https://github.com/licel/jcardsim/raw/master/jcardsim-3.0.4-SNAPSHOT.jar -o test/lib/jcardsim-3.0.4-SNAPSHOT.jar
 script:
   - ant -Dtest.build.mock=1 test
 after_success:
