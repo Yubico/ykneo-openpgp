@@ -144,6 +144,7 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
     private RandomData random;
 
     private byte[] buffer;
+    private static byte[] pgpTmpBuf;
     private byte[] authRandomBuff;
     private short out_left = 0;
     private short out_sent = 0;
@@ -212,19 +213,31 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
     }
 
     public OpenPGPApplet() {
-        // Create temporary array
+        // Create temporary buffer array for message chaining
         buffer = JCSystem.makeTransientByteArray(BUFFER_MAX_LENGTH,
                 JCSystem.CLEAR_ON_DESELECT);
+
+        // Create a shared PGP temp buffer for PGPKey usage
+        pgpTmpBuf = JCSystem.makeTransientByteArray((short) (PGPKey.KEY_SIZE_BYTES / 2), JCSystem.CLEAR_ON_DESELECT);
+
+        // Authentication buffer to store random byte used for randomization of login
         authRandomBuff = JCSystem.makeTransientByteArray((short) 1,
                 JCSystem.CLEAR_ON_DESELECT);
+
+        // PW1 mode
         pw1_modes = JCSystem.makeTransientBooleanArray((short) 2,
                 JCSystem.CLEAR_ON_DESELECT);
 
+        // RSA_PKCS1 cipher
         cipher = Cipher.getInstance(Cipher.ALG_RSA_PKCS1, false);
+
+        // Secure Random
         random = RandomData.getInstance(RandomData.ALG_SECURE_RANDOM);
 
+        // SM channel
         sm = new OpenPGPSecureMessaging();
 
+        // INIT()
         initialize();
     }
 
@@ -1357,13 +1370,13 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
         key.setQ(buffer, offset_data, len_q);
         offset_data += len_q;
 
-        key.setPQ(buffer, offset_data, len_pq);
+        key.setPQ(buffer, offset_data, len_pq, pgpTmpBuf);
         offset_data += len_pq;
 
-        key.setDP1(buffer, offset_data, len_dp1);
+        key.setDP1(buffer, offset_data, len_dp1, pgpTmpBuf);
         offset_data += len_dp1;
 
-        key.setDQ1(buffer, offset_data, len_dq1);
+        key.setDQ1(buffer, offset_data, len_dq1, pgpTmpBuf);
         offset_data += len_dq1;
 
         key.setModulus(buffer, offset_data, len_modulus);
