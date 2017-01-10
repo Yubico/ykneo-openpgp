@@ -239,7 +239,6 @@ public class OpenPGPAppletTest {
 		resp = simulator.transmitCommand(putData);
 		assertArrayEquals(success, resp); // PUT DO4 succeeds with PW3
 
-        SimulatorSystem.getRuntime().getApplet(aid).deselect();
 		simulator.reset();
 		simulator.selectApplet(aid);
 		byte[] getData = {0, (byte) 0xca, 0x01, 0x04};
