@@ -12,7 +12,7 @@ This project implement the OpenPGP card functionality used on the
 YubiKey NEO device that is sold by Yubico.
 
 This project is based on the 
-http://sourceforge.net/p/javacardopenpgp/[Java Card OpenPGP Card]
+https://github.com/jderuiter/javacard-openpgpcard[Java Card OpenPGP Card]
 project made by Joeri de Ruiter. 
 The initial modifications we have made compared to
 the upstream project are minor, but we reserve the right to make other
