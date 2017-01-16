@@ -800,8 +800,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// 65 - Cardholder Related Data
 		case (short) 0x0065:
-			buffer[offset++] = 0x65;
-			buffer[offset++] = 0x00;
 
 			// 5B - Name
 			buffer[offset++] = 0x5B;
@@ -822,17 +820,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 			buffer[offset++] = 0x01;
 			buffer[offset++] = sex;
 
-			// Set length for combined data
-			buffer[1] = (byte) (offset - 2);
-
 			return offset;
 
 		// 6E - Application Related Data
 		case (short) 0x006E:
-			buffer[offset++] = 0x6E;
-			// Total length assumed to be >= 128 and < 256
-			buffer[offset++] = (byte) 0x81;
-			buffer[offset++] = 0;
 
 			// 4F - AID
 			buffer[offset++] = 0x4F;
@@ -911,16 +902,10 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 			// Set length of combined discretionary data objects
 			buffer[ddoLengthOffset] = (byte) (offset - ddoLengthOffset - 1);
-
-			// Set length of combined data
-			buffer[2] = (byte) (offset - 3);
-
 			return offset;
 
 		// 7A - Security support template
 		case (short) 0x007A:
-			buffer[offset++] = 0x7A;
-			buffer[offset++] = (byte) 0x05;
 
 			// 93 - Digital signature counter
 			buffer[offset++] = (byte) 0x93;
@@ -932,20 +917,6 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 
 		// 7F21 - Cardholder Certificate
 		case (short) 0x7F21:
-			// Use buffer since certificate may be longer than
-			// RESPONSE_MAX_LENGTH
-			buffer[offset++] = 0x7F;
-			buffer[offset++] = 0x21;
-
-			if (cert_length < 128) {
-				buffer[offset++] = (byte) cert_length;
-			} else if (cert_length < 256) {
-				buffer[offset++] = (byte) 0x81;
-				buffer[offset++] = (byte) cert_length;
-			} else {
-				buffer[offset++] = (byte) 0x82;
-				offset = Util.setShort(buffer, offset, cert_length);
-			}
 
 			if (cert_length > 0) {
 				offset = Util.arrayCopyNonAtomic(cert, _0, buffer, offset,
