@@ -202,4 +202,4 @@ History of events
 * 2015-04-20 Some 1.0.9 NEOs were shipped without the fix, text updated
              to recommend looking for 1.0.10 as a better minimum version.
 * 2015-04-27 Add an update about Yubico replacement policy.
-* 2019-04-18 Remove the update about Yubico replacement policy, per Asana ticket: https://app.asana.com/0/901817816339551/1119108155895979/f
+* 2019-04-18 Remove the update about Yubico replacement policy.
