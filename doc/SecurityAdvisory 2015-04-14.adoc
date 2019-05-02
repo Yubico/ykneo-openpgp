@@ -158,7 +158,8 @@ relatively small as a successful attack requires other privileged
 operations (such as local root access) that are normally not available
 to an attacker, and would have undermined the security anyway.
 
-*Regardless of this assessment, Yubico has decided to replace YubiKey NEO keys for those who are using the OpenPGP applet version 1.0.9 or earlier. This replacement program began on April 26, 2015. For information on how to log a support ticket and receive a replacement YubiKey, see https://yubi.co/support[yubi.co/support].*
+Regardless of this assessment, Yubico has decided to replace YubiKey NEO keys for those who are using the OpenPGP applet version 1.0.9 or earlier. This replacement program began on April 26, 2015.
+*Update: This replacement program ended on April 18, 2019.*
 
 ++++
 <p>
@@ -203,3 +204,4 @@ History of events
              to recommend looking for 1.0.10 as a better minimum version.
 * 2015-04-27 Add an update about Yubico replacement policy.
 * 2019-04-18 Remove the update about Yubico replacement policy.
+* 2019-05-02 Clarify previous update, adding date of policy expiration.
