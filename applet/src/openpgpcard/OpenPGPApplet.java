@@ -444,6 +444,9 @@ public class OpenPGPApplet extends Applet implements ISO7816 {
 		short p1p2 = Util.makeShort(buf[OFFSET_P1], buf[OFFSET_P2]);
 		short len = (short) (buf[OFFSET_LC] & 0xFF);
 
+		if(len > (short) 0)
+			apdu.setIncomingAndReceive();
+
 		// Reset chaining if it was not yet initiated
 		if (!chain) {
 			resetChaining();
