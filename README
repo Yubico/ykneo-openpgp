@@ -1,6 +1,7 @@
 == YubiKey NEO App: OpenPGP
 
-image:https://travis-ci.org/Yubico/ykneo-openpgp.svg?branch=master["Build Status", link="https://travis-ci.org/Yubico/ykneo-openpgp"]
+NOTE: This project is in maintenance mode, it's in use on the YubiKey NEO
+but not on newer Yubico products. No development is happening on this.
 
 [IMPORTANT]
 ====
